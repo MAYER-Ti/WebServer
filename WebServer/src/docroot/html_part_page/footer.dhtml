@@ -1,0 +1,18 @@
+<footer class="footer-index">
+  <table>
+    <tr>
+      <td><h2>Диломная работа</h2></td>
+    </tr>
+    <tr>
+      <td>
+        <p>Студента группы:<br>
+          42928/2<br>
+          Лютова Александра Владимировича<br>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><image src='file/politech_icon.PNG' alt='Politech'></image></td>
+    </tr>
+  </table>
+</footer>

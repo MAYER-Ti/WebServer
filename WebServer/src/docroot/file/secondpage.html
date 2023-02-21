@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заголовок страницы</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body class="body">
+    <header>
+      <h1>Система использования удалённой базы данных</h1>
+      <p style="margin-top: 1px;">Made by: Александр Лютов</p>
+      <nav>
+        <ul class="header-ui">
+          <li><a href="page/index.html">Эта страница</a></li>
+          <li><a href="page/list">вторая страница</a></li>
+          <li><a href="page/list2">список</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main class="main">
+        <section>
+            <h2>База данных:</h2>
+            <form method="POST" action='/list2'>
+                <table>
+                    <tr>
+                        <td><label for="dbConnect">Host name:</label></td>
+                        <td><input type="text" name = "hostName"/></td>
+                    </tr>
+                    <tr>
+                        <td><label for="dbConnect">Db name:</label></td>
+                        <td><input type="text" name = "dbName"/></td>
+                    </tr>
+                    <tr>
+                        <td><label for="dbConnect">Username:</label></td>
+                        <td><input type="text" name = "username"/></td>
+                    </tr>
+                    <tr>
+                        <td><label for="dbConnect">Password:</label></td>
+                        <td><input type="password" name = "password"/></td>
+                    </tr> 
+                    <tr>
+                        <td><input type="submit" value="Connect"/></td>
+                    </tr>   
+                </table>
+            </form>
+        </section>
+        <section>
+          <h2>SQL request</h2>
+          <form method="post" action="/list2">
+            <input type="text" name = "sqlRequest"/>
+            <input type="submit" value="Send"/>
+          </form>
+        </section>
+        {if response_not_null}
+        <section>
+           
+            <h2>DataBase response</h2>
+            <table>
+                {loop row}
+                <tr>
+                    {loop column}
+                    <td></td>
+                    {end column}
+                </tr>
+                {end row}
+            </table>
+        </section>
+        {end response_not_null}
+    </main>
+    <footer class="footer">
+      <p>footer</p>
+    </footer>
+    <!-- сюда можно подключить jquery <script src="scripts/app.js" defer></script> -->
+  </body>
+</html>

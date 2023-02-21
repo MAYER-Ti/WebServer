@@ -1,0 +1,53 @@
+<main class="main">
+        <section>
+        <center>
+            <h2>База данных:</h2>
+            <form method="POST" action='/database'>
+                <table>
+                    <tr>
+                        <td><label for="dbConnect">Host name:</label></td>
+                        <td><input type="text" name = "hostName"/></td>
+                    </tr>
+                    <tr>
+                        <td><label for="dbConnect">Db name:</label></td>
+                        <td><input type="text" name = "dbName"/></td>
+                    </tr>
+                    <tr>
+                        <td><label for="dbConnect">Username:</label></td>
+                        <td><input type="text" name = "userName"/></td>
+                    </tr>
+                    <tr>
+                        <td><label for="dbConnect">Password:</label></td>
+                        <td><input type="password" name = "password"/></td>
+                    </tr> 
+                    <tr>
+                        <td><input type="submit" value="Connect"/></td>
+                    </tr>   
+                </table>
+            </form>
+        </center>
+        </section>
+        <section>
+          <h2>SQL request</h2>
+          <form method="POST" action='/database'>
+            <input type="text" name="sqlRequest"/>
+            <input type="submit" value="Send"/>
+          </form>
+
+        </section>
+        {if response_not_null}
+        <section>
+           
+            <h2>DataBase response</h2>
+            <table>
+                {loop row}
+                <tr>
+                    {loop column}
+                    <td>{row.value}</td>
+                    {end column}
+                </tr>
+                {end row}
+            </table>
+        </section>
+        {end response_not_null}
+    </main>
