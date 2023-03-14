@@ -49,9 +49,12 @@ QString searchConfigFile() {
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
-    QString pathIni = "F:/praktika/WebServer/WebServer/etc/webserver.ini";
+    app.addLibraryPath(app.applicationDirPath()+"/plugins");
+    qDebug() << app.applicationDirPath()+"/plugins";
+
+    //QString pathIni = "F:/praktika/WebServer/WebServer/etc/webserver.ini";
     //QString pathIni = "/run/user/1000/media/by-uuid-5070-0F3F/praktika/WebServer/WebServer/etc/webserver.ini";
-    //QString pathIni = searchConfigFile();
+    QString pathIni = searchConfigFile();
 
     //Session store
     QSettings* sessionSettings = new QSettings(pathIni,QSettings::IniFormat, &app);

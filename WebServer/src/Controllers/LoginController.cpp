@@ -12,12 +12,23 @@ void LoginController::service(HttpRequest &request, HttpResponse &response)
 {
     //cookie session
     HttpSession session = sessionStore->getSession(request,response,true);
-    //get loin & pass
-    QByteArray username = request.getParameter("username");
-    QByteArray password = request.getParameter("password");
-    // show log & pass
-    qDebug("username=%s", username.constData());
-    qDebug("password=%s", password.constData());
+
+    QString sessionUsername = session.get("username").toString();
+
+    //get request login & pass
+    QByteArray requestUsername = request.getParameter("username");
+    QByteArray requestPassword = request.getParameter("password");
+
+    //log-in
+    if(sessionUsername == "" && requestUsername == "admin" && requestPassword == "admin"){
+        session.set("username", requestUsername);
+        session.set("logintime", QTime::currentTime());
+    }
+    // show request log & pass
+    qDebug("LoginController: Request username=%s", requestUsername.constData());
+    qDebug("LoginController: Request password=%s", requestUsername.constData());
+    qDebug() << "LoginController: Session username=" << sessionUsername;
+
 
     //set http header
     response.setHeader("Content-Type", "text/html; charset=UTF-8");
@@ -28,20 +39,11 @@ void LoginController::service(HttpRequest &request, HttpResponse &response)
     Template tempHeader = templateCache->getTemplate("header");
     tempHeader.setCondition("logged-in", session.contains("username"));
     response.write(tempHeader.toUtf8());
-    if(!session.contains("username") ||  (username != "admin" && password != "admin")){
-        //get tamplate login and set condition logged-in
-        Template tempLogin = templateCache->getTemplate("main_login");
-        tempLogin.setCondition("logged-in", session.contains("username"));
-        response.write(tempLogin.toUtf8());
-    }
-    else{
-        response.write("<main class='main-index'><center><h2>loggin is successful</h2></center></main>");
-    }
 
-    if (username == "admin" and password == "admin") {
-        session.set("username", username);
-        session.set("logintime", QTime::currentTime());
-    }
+    //get tamplate login and set condition logged-in
+    Template tempLogin = templateCache->getTemplate("main_login");
+    tempLogin.setCondition("logged-in", session.contains("username"));
+    response.write(tempLogin.toUtf8());
 
     //get tamplate footer
     Template tempFooter = templateCache->getTemplate("footer");

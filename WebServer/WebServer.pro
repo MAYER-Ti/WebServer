@@ -32,12 +32,16 @@ OTHER_FILES += src/docroot/page/*
 include(../QtWebApp/httpserver/httpserver.pri)
 include(../QtWebApp/templateengine/templateengine.pri)
 
+
+
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
+    src/docroot/file/faviocon.ico \
     src/docroot/file/index.html \
     src/docroot/file/listdata.html \
     src/docroot/file/login.html \
@@ -51,5 +55,17 @@ DISTFILES += \
     src/docroot/html_part_page/main_login.dhtml \
     src/docroot/style.css
 
+
+
+
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/./ -llibpq
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/./ -llibpq
+else:unix:!macx: LIBS += -L$$PWD/./ -llibpq
+
+INCLUDEPATH += $$PWD/../
+DEPENDPATH += $$PWD/../
+
+unix|win32: LIBS += -llibpq
 
 

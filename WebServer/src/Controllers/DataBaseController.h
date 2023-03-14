@@ -7,12 +7,16 @@
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
+#include <QtSql/QSqlDriver>
+#include <QList>
 
 using namespace stefanfrings;
 
 class DataBaseController : public HttpRequestHandler
 {
     Q_OBJECT
+private:
+
 public:
     explicit DataBaseController(QObject *parent = nullptr);
     void service(HttpRequest& request, HttpResponse& response);

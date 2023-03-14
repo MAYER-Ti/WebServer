@@ -21,33 +21,30 @@
                         <td><input type="password" name = "password"/></td>
                     </tr> 
                     <tr>
+                        <td><label for="dbConnect">SQLRequest</label></td>
+                        <td><input type="text" name="sqlRequest"/></td>
+                    </tr> 
+                    <tr>
                         <td><input type="submit" value="Connect"/></td>
                     </tr>   
                 </table>
             </form>
         </center>
         </section>
-        <section>
-          <h2>SQL request</h2>
-          <form method="POST" action='/database'>
-            <input type="text" name="sqlRequest"/>
-            <input type="submit" value="Send"/>
-          </form>
-
-        </section>
         {if response_not_null}
         <section>
-           
+           <center>
             <h2>DataBase response</h2>
             <table>
                 {loop row}
                 <tr>
-                    {loop column}
-                    <td>{row.value}</td>
-                    {end column}
+                    {loop row.column}
+                    <td>{row.column.value}</td>
+                    {end row.column}
                 </tr>
                 {end row}
             </table>
+            </center>
         </section>
         {end response_not_null}
     </main>

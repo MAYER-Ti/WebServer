@@ -23,6 +23,7 @@ public:
     LoginController m_login;
     CookieTestController m_cookie;
     DataBaseController m_database;
+
 };
 
 #endif // REQUESTMAPPER_H
