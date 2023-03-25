@@ -57,15 +57,11 @@ DISTFILES += \
 
 
 
-
-
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/./ -llibpq
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/./ -llibpq
-else:unix:!macx: LIBS += -L$$PWD/./ -llibpq
+#unix:LIBS += -lpq
+#win32:LIBS += libpqdll.lib
 
 INCLUDEPATH += $$PWD/../
 DEPENDPATH += $$PWD/../
 
-unix|win32: LIBS += -llibpq
 
 

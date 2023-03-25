@@ -32,20 +32,20 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
     if(!listParametersKeys.isEmpty()){
         qDebug() << "DataBaseController: Parameters input:" << listParametersKeys;
     }
-    QString dbName = "postgres"/*request.getParameter("dbName").constData()*/;
-    QString userName = "postgres"/*request.getParameter("userName").constData()*/;
-    QString hostName = "127.0.0.1"/*request.getParameter("hostName").constData()*/;
+    QString dbName = /*"postgres"*/request.getParameter("dbName").constData();
+    QString userName = /*"postgres"*/request.getParameter("userName").constData();
+    QString hostName = /*"localhost"*/request.getParameter("hostName").constData();
     QString password = "superuserdbpass"/*request.getParameter("password").constData()*/;
 
 
     //isDbLogin = true;
     QSqlDatabase dataBase;
-    dataBase = QSqlDatabase::addDatabase("PSQL7", "condb");
+    dataBase = QSqlDatabase::addDatabase("QPSQL");
     dataBase.setDatabaseName(dbName);
     dataBase.setUserName(userName);
     dataBase.setHostName(hostName);
     dataBase.setPassword(password);
-
+    dataBase.open(); //ред
     if(!dataBase.isOpen())
         qDebug() << "DataBaseController: database not open!";
     else
@@ -63,7 +63,6 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
         qDebug() << rows;
 
         dataBase.close();
-        dataBase.removeDatabase("condb");
 
 
 
