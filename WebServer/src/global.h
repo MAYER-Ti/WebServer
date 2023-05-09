@@ -7,11 +7,12 @@
 
 
 
+
+
 using namespace stefanfrings;
 
 extern HttpSessionStore* sessionStore;
 extern StaticFileController* staticFileController;
 extern TemplateCache* templateCache;
-
 
 #endif // GLOBAL_H

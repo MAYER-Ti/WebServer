@@ -1,0 +1,123 @@
+    <main>
+        <h2>База данных:</h2>
+        <table>
+            <tr>
+                <td>
+                <section>
+                <center>
+                    <form method="POST" action='/database'>
+                        <table>
+                            {if isadmin}
+                            <tr>
+                                <td><label for="dbConnect">Db name:</label></td>
+                                <td><input type="text" name = "dbName" value="{dbName}"/></td>
+                            </tr>
+                            <tr>
+                                <td><label for="dbConnect">Username:</label></td>
+                                <td><input type="text" name = "userName" value="{usernamedb}"/></td>
+                            </tr>
+                            {end isadmin}
+                            <tr>
+                                <td><label for="dbConnect">Password:</label></td>
+                                <td><input type="password" name = "password" value="{passworddb}"/></td>
+                            </tr>
+
+                            <tr>
+                                <td><label for="dbConnect">SQLRequest</label></td>
+                                <td><textarea name="sqlRequest" cols="40" rows="3"></textarea></td>
+                            </tr>
+                            <tr>
+                                <td><input type="submit" value="Connect"/></td>
+                            </tr>
+                            <tr>
+                                {if sing-up_dataBase}
+                                <td>
+                                    <h2>Инструменты:</h2>
+                                        <label for="DbName">Название таблицы:</label>
+                                        <input type="text" name="doingtbname"/>
+                                        <br>
+                                        <label for="DbName">Название поля:</label>
+                                        <input type="text" name="namepole"/>
+                                        <select name="typepole">
+                                            <option value="text">text</option>
+                                            <option value="INT">int</option>
+                                            <option value="DATE">date</option>
+                                        </select>
+                                        <div>
+                                            <input type="checkbox" id="PK" name="isPK" value="PRIMARY KEY">
+                                            <label for="PK">PRIMARY KEY</label>
+                                        </div>
+                                        <button name="typedo" value="create">Create</button>
+                                        <button name="typedo" value="drop">Drop</button>
+                                </td>
+                                {end sing-up_dataBase}
+                            </tr>
+                        </table>
+                    </form>
+                </center>
+                </section>
+                </td>
+                {if sing-up_dataBase}
+                {if isadmin}
+                <td>
+                <section>
+                <center>
+                <h2>Доступные базы данных:</h2>
+                    <table>
+                        {loop listdb}
+                            {loop listdb.column}
+                        <tr><td>{listdb.column.value}</td></tr>
+                            {end listdb.column}
+                        {end listdb}
+                    </table>
+                </center>
+                </section>
+                </td>
+                {end isadmin}
+                <td>
+                <section>
+                <center>
+                    <h2>Доступные таблицы:</h2>
+                    <table>
+                        {loop tables}
+                            <tr>
+                            {loop tables.column}
+                                <td>{tables.column.value}</td>
+                            {end tables.column}
+                            </tr>
+                        {end tables}
+                    </table>
+                </center>
+                </section>
+                </td>
+                {end sing-up_dataBase}
+            </tr>
+        </table>
+        {if response_not_null}
+        <section>
+        <center>
+        <table>
+            <tr>
+                <td>
+                    <center>
+                    <h2>response</h2>
+                    <table>
+                        {loop row}
+                        <tr>
+                            {loop row.column}
+                            <td>{row.column.value}</td>
+                            {end row.column}
+                        </tr>
+                        {end row}
+                     </table>
+                     </center>
+                </td>
+            </tr>
+        </table>
+        </center>
+        </section>
+        {end response_not_null}
+        {if message}
+        <p>{messagetext}</p>
+        {end message}
+    </main>

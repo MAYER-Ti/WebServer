@@ -5,10 +5,12 @@
 
 #include <httprequesthandler.h>
 
-#include "Controllers/ListDataController.h"
+#include "Controllers/AboutController.h"
 #include "Controllers/LoginController.h"
 #include "Controllers/CookieTestController.h"
 #include "Controllers/DataBaseController.h"
+#include "Controllers/RegisterController.h"
+#include "Controllers/HomeController.h"
 
 using namespace stefanfrings;
 
@@ -19,10 +21,13 @@ public:
     explicit RequestMapper(QObject *parent = nullptr);
     void service(HttpRequest& request, HttpResponse& response);
 
-    ListDataController m_data;
+    AboutController m_about;
     LoginController m_login;
     CookieTestController m_cookie;
     DataBaseController m_database;
+    RegisterController m_reg;
+    HomeController m_home;
+
 
 };
 
