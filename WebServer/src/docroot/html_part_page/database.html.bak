@@ -178,7 +178,7 @@
                      </table>
                 </div>
             </div>
-            <!-- <p class="text-md-start"><a href="#">Export response to excel file</a></p>  -->
+            <p class="text-md-start"><a href="#">Export response to excel file</a></p>
             {end response_not_null}
         </section>
     </div>

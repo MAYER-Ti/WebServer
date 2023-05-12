@@ -112,28 +112,22 @@ QString UserDataBase::decodeStr(QString str, quint32 key)
 
 QList<QList<QString>> UserDataBase::getRequest(QString sqlReq)
 {
-
-    //test
-    return {{"0", "0", "0", "0", "0", "0", "0", "0"},
-        {"0", "0", "0", "0", "0", "0", "0", "0"},
-        {"0", "0", "0", "0", "0", "0", "0", "0"}};
-
+    QList<QList<QString>> rows;
     if(!m_ndb.open()){
         qDebug() << "UserDataBase: getRequest - Open -" << m_ndb.lastError().text();
-        return {{"0"}};
+        return rows;
     }
     qDebug() << "UserDataBase: sql request - " << QString(sqlReq);
     QSqlQuery query(m_ndb);
-    QList<QList<QString>> rows;
     if(!query.exec(QString(sqlReq))){
         qDebug() << "SQL operation failed!";
         qDebug() << query.lastError();
         m_ndb.close();
-        return {{"0"}};
+        return rows;
     }
     if(query.size() == 0){
         m_ndb.close();
-        return {{"0"}};
+        return rows;
     }
     int columnCount = query.record().count()-1;
     //set header row
@@ -150,11 +144,9 @@ QList<QList<QString>> UserDataBase::getRequest(QString sqlReq)
         }
         rows.append(valueRow);
     }
-
-
     if(rows.isEmpty()){
         m_ndb.close();
-        return {{"0"}};
+        return rows;
     }
     qDebug() << rows;
     qDebug() << "DataBaseController: row count:" << rows.count();
@@ -202,11 +194,35 @@ bool UserDataBase::CreateTable(QString tbName)
     }
 }
 
+bool UserDataBase::CreateColumn(QString tbName, QString columnName, QString columnType, bool isPK)
+{
+    if(!m_ndb.open()){
+        qDebug() << "UserDataBase: CreateColumn - Open -" << m_ndb.lastError().text();
+        return false;
+    }
+    QSqlQuery query(m_ndb);
+    QString sqlReq = QString("CREATE TABLE IF NOT EXIST %1();").arg(tbName);
+    if(!query.exec(sqlReq)){
+        qDebug() << "UserDataBase: CreateColumn - create table -" << m_ndb.lastError().text();
+        m_ndb.close();
+        return false;
+    }
+    QString pk;
+    if(isPK)
+        pk = "PRIMARY KEY";
+    else
+        pk = "";
+    sqlReq = QString("ALTER TABLE %1 ADD COLUMN IF NOT EXIST %2 %3 %4;").arg(tbName).arg(columnName).arg(columnType).arg(pk);
+    if(!query.exec(sqlReq)){
+        qDebug() << "UserDataBase: CreateColumn - add column -" << m_ndb.lastError().text();
+        m_ndb.close();
+        return false;
+    }
+    return true;
+}
+
 bool UserDataBase::CreateConnectToDb(QString _hostName, QString _userName, QString _dbName, QString _pass)
 {
-    //test
-    return true;
-
     m_ndb = QSqlDatabase::addDatabase("QPSQL", nameConnect);
     m_ndb.setHostName(_hostName);
     m_ndb.setUserName(_userName);
@@ -219,18 +235,19 @@ bool UserDataBase::CreateConnectToDb(QString _hostName, QString _userName, QStri
     return true;
 }
 
-bool UserDataBase::InsertRow(QString tableName, QStringList values)
+bool UserDataBase::InsertRow(QString tableName, QList<QByteArray> values)
 {
 //    if(!m_ndb.open()){
 //        qDebug() << "UserDataBase: InsertRow - Open -" << m_ndb.lastError().text();
 //        return false;
 //    }
-//    QString sqlReq = QString("INSERT INTO %1 VALUES(%2").arg(tableName).arg(values.at(0));
-//    for(int i = 1; i < values.count(); i++){
-//        sqlReq += ", " + values.at(i);
-//    }
-//    sqlReq += ");";
-//    qDebug() << sqlReq;
+
+    QString sqlReq = QString("INSERT INTO %1 VALUES(%2").arg(tableName).arg(QString(values.at(0)));
+    for(int i = 1; i < values.length(); i++){
+        sqlReq += ", " + QString(values.at(i));
+    }
+    sqlReq += ");";
+    qDebug() << sqlReq;
 //    QSqlQuery query(m_ndb);
 //    if(!query.exec(sqlReq)){
 //        qDebug() << "UserDataBase: InsertRow - " << query.lastError().text();
@@ -284,11 +301,6 @@ bool UserDataBase::InsertColumn(QString tableName, QString columnName, QString d
 
 QList<QList<QString>> UserDataBase::getTables()
 {
-    //test
-    return {{"0", "0", "0", "0", "0", "0", "0", "0"},
-        {"0", "0", "0", "0", "0", "0", "0", "0"},
-        {"0", "0", "0", "0", "0", "0", "0", "0"}};
-
     QString sqlReq = QString("SELECT table_name, column_name, data_type, is_nullable "
                              "FROM information_schema.columns "
                              "WHERE table_schema = 'public';");
@@ -298,16 +310,12 @@ QList<QList<QString>> UserDataBase::getTables()
 
 QList<QList<QString>> UserDataBase::getDbList()
 {
-    //test
-    return {{"0", "0", "0", "0", "0", "0", "0", "0"},
-        {"0", "0", "0", "0", "0", "0", "0", "0"},
-        {"0", "0", "0", "0", "0", "0", "0", "0"}};
     QString sqlReq = QString("select datname from pg_database;");
     return getRequest(sqlReq);
 }
 
 int UserDataBase::getIdRoleFromUser(QString userlogin)
-{   return 0;
+{
     int result = -1;
     if(!m_ndb.open()){
         qDebug() << "UserDataBase: getIdRoleFromUser - Open - " << m_ndb.lastError().text();
@@ -333,9 +341,6 @@ int UserDataBase::getIdRoleFromUser(QString userlogin)
 
 bool UserDataBase::CreateDB()
 {
-    //test
-    return true;
-
     QSqlQuery query(m_ndb);
 
     bool isWorked = false;
@@ -359,7 +364,7 @@ bool UserDataBase::CreateDB()
     isWorked += query.exec("CREATE TABLE IF NOT EXISTS logusers ("
                           "id INT NOT NULL DEFAULT nextval('id_seq'::regclass), "
                           "loginUser text,"
-                          "yearUser INT,"
+                          "yearUser text,"
                           "passwordUser text,"
                           "CONSTRAINT PK_logusers PRIMARY KEY (id)"
                           ");");

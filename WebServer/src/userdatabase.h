@@ -32,14 +32,15 @@ public:
     bool IsOpen(){ return m_ndb.isOpen(); }
     void CloseDb(){m_ndb.close(); }
     bool OpenDb(){ return m_ndb.open(); }
-    bool IsConnect(){ return (/*!m_ndb.hostName().isEmpty() &&
+    bool IsConnect(){ return (!m_ndb.hostName().isEmpty() &&
                               !m_ndb.userName().isEmpty() &&
                               !m_ndb.databaseName().isEmpty() &&
-                               m_ndb.contains(m_ndb.connectionName())*/ true); }
+                               m_ndb.contains(m_ndb.connectionName())); }
 
     void CloseConnect(){ m_ndb.removeDatabase(m_ndb.connectionName()); }
     bool DropTable(QString tbName);
     bool CreateTable(QString tbName);
+    bool CreateColumn(QString tbName, QString columnName, QString columnType, bool isPK);
 signals:
     void sigConnected();
 public slots:
@@ -47,7 +48,7 @@ public slots:
                            QString _userName = "postgres",
                            QString _dbName = "postgres",
                            QString _pass = "");
-    bool InsertRow(QString tableName, QStringList values);
+    bool InsertRow(QString tableName, QList<QByteArray> values);
     bool DropColumn(QString tableName, QString columnName);
     bool InsertColumn(QString tableName, QString columnName, QString dataType, bool isPK);
     QList<QList<QString>> getTables();

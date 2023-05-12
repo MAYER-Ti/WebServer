@@ -10,7 +10,7 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
 {
     HttpSession session = sessionStore->getSession(request,response,true);
     QString username = session.get("username").toString();
-    QString idRole = session.get("idrole").toString();
+    QString idRole = "0"/*session.get("idrole").toString()*/;
     QByteArray language = request.getHeader("Accept-Language");
     qDebug("language=%s",qPrintable(language));
 
@@ -20,6 +20,9 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
     temp.setCondition("logged-in", session.contains("username"));
     temp.setCondition("isadmin", (idRole == ADMIN));
     temp.setCondition("message", true);
+    //test !!!!!!
+    temp.setCondition("sing-up_dataBase", true);
+    temp.setCondition("listTablesNotNull", true);
 
     qDebug() << "DataBaseController: isadmin - " << (idRole == ADMIN);
     QString requestdbName;
@@ -47,21 +50,24 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
     const QString requestColumnName = request.getParameter("namepole").constData();
     const QString requestColumnType = request.getParameter("typepole").constData();
     const bool requestColumnIsPK = !request.getParameter("isPK").isEmpty();
-//    const QStringList requestInsertValues =
-//            QString(request.getParameter("insertvalues").constData()).split(" ");
-
+    const QList<QByteArray> requestInsertValues = request.getParameters("input");
+    qDebug() << "DataBaseController: requestInsertValues - " << requestInsertValues;
 // namedb usernamedb passworddb
     temp.setVariable("namedb", requestdbName);
     temp.setVariable("usernamedb", requestUserName);
     temp.setVariable("passworddb", requestPassword);
     //Connect to db
-    if((requestdbName == "" || requestUserName == "" /*|| requestPassword == ""*/) && (!userDataBase.IsConnect())){
+    if((requestdbName == "" || requestUserName == "" || (idRole == ADMIN && requestPassword != "") || (idRole == CLIENT && requestPassword == "")/*|| requestPassword == ""*/) && (!userDataBase.IsConnect())){
         qDebug() << "DataBaseController: No parameters";
         qDebug() << "namedb:" << requestdbName << "usernamedb:" << requestUserName << "hostnamedb:" << requestHostName << "password:" << requestPassword;
         temp.setCondition("response_not_null", false);
         qDebug() << "DataBaseController: setCondition - response_not_null - " << false;
         temp.setCondition("sing-up_dataBase", false);
         qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << false;
+        temp.setCondition("listTablesNotNull", false);
+        qDebug() << "DataBaseController: setCondition - listTablesNotNull - " << false;
+        temp.setCondition("message", false);
+        qDebug() << "DataBaseController: setCondition - message - " << false;
     }
     else if(!requestdbName.isEmpty() &&
             !requestUserName.isEmpty() &&
@@ -76,8 +82,7 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
             if(userDataBase.CreateConnectToDb(requestHostName , requestUserName, requestdbName, requestPassword)){
                 qDebug() << "DataBaseController: connect admin";
                 qDebug() << "DataBaseController: db connect succesed!";
-                temp.setCondition("message", true);
-                temp.setVariable("messagetext", "Connect to database successed!");
+                temp.setVariable("messagetext", "Status: Connect to database successed!");
 //                tempMain.setCondition("sing-up_dataBase", true);
 //                qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << true;
             }
@@ -85,82 +90,74 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
                 temp.setCondition("sing-up_dataBase", false);
                 qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << false;
                 qDebug() << "DataBaseController: db connect faild!";
-                temp.setCondition("message", true);
-                temp.setVariable("messagetext", "Connect to database faild!");
+                temp.setVariable("messagetext", "Status: Connect to database faild!");
             }
         }
         else if(idRole == CLIENT){
             if(requestUserName == "postgres" || requestdbName == "postgres"){
                 qDebug() << "DataBaseController: no access to connect!";
-                temp.setCondition("message", true);
-                temp.setVariable("messagetext", "No access to connect!");
+                temp.setVariable("messagetext", "Status: No access to connect!");
                 temp.setCondition("response_not_null", false);
                 qDebug() << "DataBaseController: setCondition - response_not_null - " << false;
                 temp.setCondition("sing-up_dataBase", false);
+                temp.setCondition("listTablesNotNull", false);
                 qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << false;
             }
             else{
                 if(userDataBase.CreateConnectToDb(/*requestHostName*/ "localhost", requestUserName, requestdbName, requestPassword)){
                     qDebug() << "DataBaseController: connect client";
                     qDebug() << "DataBaseController: db connect succesed!";
-                    temp.setCondition("message", true);
-                    temp.setVariable("messagetext", "Connect to database successed!");
+                    temp.setVariable("messagetext", " Status: Connect to database successed!");
                 }
                 else{
                     qDebug() << "DataBaseController: db connect faild!";
-                    temp.setCondition("message", true);
-                    temp.setVariable("messagetext", "Connect to dataBase faild!");
+                    temp.setVariable("messagetext", " Status: Connect to dataBase faild!");
                 }
             }
         }
     }
-//    //insert row
-//    if(userDataBase.IsConnect() && (requestInsertValues.count() && requestDoingTbName != "")){
-//        qDebug() << "DataBaseController: insert row";
-//        tempMain.setCondition("sing-up_dataBase", true);
-//        qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << true;
-//        if(!userDataBase.InsertRow(requestDoingTbName, requestInsertValues)){
-//            qDebug() << "DataBaseController: InsertRow faild!";
-//        }
-//    }
+    //insert row
+    if(/*userDataBase.IsConnect() && */(requestInsertValues.count() && requestDoingTbName != "")){
+        qDebug() << "DataBaseController: insert row";
+        temp.setCondition("sing-up_dataBase", true);
+        qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << true;
+        if(!userDataBase.InsertRow(requestDoingTbName, requestInsertValues)){
+            qDebug() << "DataBaseController: InsertRow faild!";
+        }
+    }
     //insert column
     if(userDataBase.IsConnect() && (requestColumnType != "" && requestDoingTbName != "" && requestTypedo != "")){
         temp.setCondition("sing-up_dataBase", true);
         qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << true;
-        temp.setCondition("message", true);
         if(requestTypedo == "create"){
             qDebug() << "DataBaseController: insert column";
             if(!userDataBase.InsertColumn(requestDoingTbName, requestColumnName, requestColumnType, requestColumnIsPK)){
                 qDebug() << "DataBaseController: InsertColumn faild!";
-                temp.setCondition("message", true);
-                temp.setVariable("messagetext", "InsertColumn faild!");
+                temp.setVariable("messagetext", " Status: InsertColumn faild!");
             }
         }
         if(requestTypedo == "drop"){
             qDebug() << "DataBaseController: drop column";
             if(!userDataBase.DropColumn(requestDoingTbName, requestColumnName)){
                 qDebug() << "DataBaseController: DropColumn faild!";
-                temp.setCondition("message", true);
-                temp.setVariable("messagetext", "DropColumn faild!");
+                temp.setVariable("messagetext", " Status: DropColumn faild!");
             }
         }
     }
     //show database list and list of tables if connect to db is true
     if(userDataBase.IsConnect()){
         temp.setCondition("sing-up_dataBase", true);
+
         qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << true;
         if(idRole == ADMIN){
             //show a list of databases
             qDebug() << "DataBaseController: show a list of databases";
-            QList<QList<QString>> dbList = {{"1", "0", "0", "0", "0", "0", "0", "0"},
-                                            {"0", "0", "0", "0", "0", "0", "0", "0"},
-                                            {"0", "0", "0", "0", "0", "0", "0", "0"}}/*userDataBase.getDbList()*/;
+            QList<QList<QString>> dbList = userDataBase.getDbList();
             qDebug() << "DataBaseController: databases - " << dbList;
             temp.loop("listdb", dbList.count());
             qDebug() << "DataBaseController: loop - listdb - " << dbList;
-            if(dbList.at(0).at(0) == "0"){
-                temp.setCondition("message", true);
-                temp.setVariable("messagetext", "Error connected!");
+            if(dbList.isEmpty()){
+                temp.setVariable("messagetext", "Status: No connect!");
                 temp.setCondition("sing-up_dataBase", false);
             }
             else{
@@ -177,17 +174,16 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
         }
         //show a list of tables
         qDebug() << "DataBaseController: show a list of tables";
-        QList<QList<QString>> tablesInfoList = {{"1", "0", "0", "0"},
-                                                {"0", "0", "0", "0"},
-                                                {"0", "0", "0", "0"},
-                                                {"0", "0", "0", "0"}}/*userDataBase.getTables()*/;
+        QList<QList<QString>> tablesInfoList = userDataBase.getTables();
         qDebug() << "DataBaseController: loop - tables - " << tablesInfoList;
-        if(tablesInfoList.at(0).at(0) == "0"){
-            temp.setCondition("message", true);
-            temp.setVariable("messagetext", "Error connected!");
+        if(tablesInfoList.isEmpty()){
+            temp.setVariable("messagetext", "Status: No connect!");
             temp.setCondition("sing-up_dataBase", false);
+            temp.setCondition("listTablesNotNull", false);
+            qDebug() << "DataBaseController: setCondition - listTablesNotNull - " << false;
         }
         else{
+            temp.setCondition("listTablesNotNull", true);
             int rowCount = tablesInfoList.count();
             temp.loop("tables", rowCount);
             for(int i = 0; i < rowCount; i++){
@@ -197,14 +193,12 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
                 temp.setVariable("tables" + QString::number(i) + ".data_type", tablesInfoList.at(i).at(2));
                 temp.setVariable("tables" + QString::number(i) + ".is_nullable", tablesInfoList.at(i).at(3));
             }
-
-
         }
     }
     else{
         temp.setCondition("sing-up_dataBase", false);
-        temp.setVariable("messagetext", "Error connected!");
-        temp.setCondition("sing-up_dataBase", false);
+        temp.setVariable("messagetext", " Status: Error connected!");
+        temp.setCondition("listTablesNotNull", false);
     }
     //if doingdb not null and typedo not null create or drop table
     if(userDataBase.IsConnect() && ((requestDoingTbName != "") && (requestTypedo != ""))){
@@ -212,15 +206,23 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
         temp.setCondition("sing-up_dataBase", true);
         qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << true;
         if(requestTypedo == "create"){
-            if(!userDataBase.CreateTable(requestDoingTbName)){
+            if(requestColumnName != ""){
+                if(!userDataBase.CreateColumn(requestDoingTbName, requestColumnName, requestColumnType, requestColumnIsPK)){
+                    qDebug() << "DataBaseController: Create column " << requestColumnName << "faild";
+                    temp.setVariable("messagetext", "Status: Create table " + requestDoingTbName + " faild");
+                }
+                else{
+                    qDebug() << "DataBaseController: Create column";
+                    temp.setVariable("messagetext", " Status: Create column successed!");
+                }
+            }
+            else if(!userDataBase.CreateTable(requestDoingTbName)){
                 qDebug() << "DataBaseController: Create table " << requestDoingTbName << " faild";
-                temp.setCondition("message", true);
-                temp.setVariable("messagetext", "Create table " + requestDoingTbName + " faild");
+                temp.setVariable("messagetext", " Status: Create table " + requestDoingTbName + " faild");
             }
             else{
                 qDebug() << "DataBaseController: Create table";
-                temp.setCondition("message", true);
-                temp.setVariable("messagetext", "Create table successed!");
+                temp.setVariable("messagetext", " Status: Create table successed!");
             }
         }
         else if(requestTypedo == "drop"){
@@ -250,8 +252,7 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
             }
         }
         else{
-            temp.setCondition("message", true);
-            temp.setVariable("messagetext", "SQL request not valid!");
+            temp.setVariable("messagetext", " Status: SQL request not valid!");
             temp.setCondition("response_not_null", false);
             qDebug() << "DataBaseController: setCondition - response_not_null - " << false;
         }
