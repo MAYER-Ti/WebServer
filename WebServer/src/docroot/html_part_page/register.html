@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Remote Database usage system</title>
     <link href="file/css/bootstrap.min.css" rel="stylesheet">
+    <link href="file/css/bootstrap.min.css.map" rel="stylesheet">
+    <link href="file/js/bootstrap.bundle.min.js.map" rel="stylesheet">
     <link href="file/css/sign-in.css" rel="stylesheet">
   </head>
   <body>
@@ -53,27 +55,23 @@
         <form method="POST">
             <h1 class="h3 mb-3 fw-normal">Please reg in</h1>
             <div class="form-floating">
-                <input type="text" class="form-control" id="floatingInput" placeholder="login" name="username">
+                <input type="text" class="form-control"  placeholder="login" name="username">
                 <label for="floatingInput">Login</label>
             </div>
             <div class="form-floating">
-                <input type="date" class="form-control" id="floatingInput" placeholder="date" name="year">
+                <input type="date" class="form-control"  placeholder="date" name="year">
                 <label for="floatingInput">Date</label>
             </div>
             <div class="form-floating">
-                <input type="password" class="form-control" id="floatingInput" placeholder="password" name="password">
+                <input type="password" class="form-control"  placeholder="password" name="password">
                 <label for="floatingInput">Password</label>
-            </div>
-            <div class="form-floating">
-                <input type="password" class="form-control" id="floatingInput" placeholder="confirmpassword" name="password">
-                <label for="floatingInput">Confirm password</label>
             </div>
             <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
             <p class="mt-1 mb-1 text-body-secondary">Back to <a href="/home">home</a> page</p>
         </form>
         {else logged-in}
         <h2 class="h3 mb-3 fw-normal">You are regged in</h2>
-        <p class="mt-1 mb-1 text-body-secondary">Go to <a href="/home">sign-in</a> page</p>
+        <p class="mt-1 mb-1 text-body-secondary">Go to <a href="/database">database</a> page</p>
         {end logged-in}
       </main>
       <!-- footer -->

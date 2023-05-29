@@ -37,17 +37,26 @@ void RegisterController::service(HttpRequest &request, HttpResponse &response)
             qDebug() << "isUser - " << isUser;
 
             if(!isUser){
-                if(userDataBase.InputNewUser(requestUsername, requestYear, requestPassword))
+                if(userDataBase.InputNewUser(requestUsername, requestYear, requestPassword)){
+                    int idRole = userDataBase.getIdRoleFromUser(requestUsername);
+
+                    session.set("username", requestUsername);
+                    session.set("idrole", QString::number(idRole));
+                    session.set("logintime", QTime::currentTime());
+                    session.set("groupid", "");
                     qDebug() << "insert new user successed!";
+                }
+
                 else
                     qDebug() << "insert new user failed!";
             }
 
             // show request log & pass
             qDebug() << "RegisterController: Request username=" << requestUsername;
-            qDebug() <<"RegisterController: Request password=" << requestPassword;
+            qDebug() << "RegisterController: Request password=" << requestPassword;
             qDebug() << "RegisterController: Session username=" << sessionUsername;
             qDebug() << "RegisterController: Session idrole=" << sessionIdRole;
+
         }
 
 

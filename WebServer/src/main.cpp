@@ -13,8 +13,9 @@ using namespace stefanfrings;
 
 QString searchConfigFile() {
     QString binDir = QCoreApplication::applicationDirPath();
-    qDebug() << "!" << binDir;
     QString appName=QCoreApplication::applicationName();
+    qDebug() << "app name" << appName;
+    qDebug() << "bin dir" << binDir;
     QString fileName("webserver.ini");
 
     QStringList searchList;
@@ -50,8 +51,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
     app.addLibraryPath(app.applicationDirPath()+"/plugins");
-    qDebug() << app.applicationDirPath()+"/plugins";
-
+    //QString pathIni = "/home/Projects/WebServer/WebServer/etc/webserver.ini";
     //QString pathIni = "F:/praktika/WebServer/WebServer/etc/webserver.ini";
     //QString pathIni = "/run/user/1000/media/by-uuid-5070-0F3F/praktika/WebServer/WebServer/etc/webserver.ini";
     QString pathIni = searchConfigFile();

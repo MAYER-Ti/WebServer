@@ -16,8 +16,10 @@ void RequestMapper::service(HttpRequest &request, HttpResponse &response)
     QByteArray sessionId = sessionStore->getSessionId(request,response);
     QString username = session.get("username").toString();
     QString idRole = session.get("idrole").toString();
+    QString idGroup = session.get("groupid").toString();
     qDebug() << "RequestMapper:" << "username" << username;
     qDebug() << "RequestMapper:" << "idrole" << idRole;
+    qDebug() << "RequestMapper:" << "idgroup" << idGroup;
 
     if(path == "/logout"){
         if(!sessionId.isEmpty() && username != ""){
