@@ -71,7 +71,7 @@
                             <label for="floatingInput">Password</label>
                         </div>
                         <button class="w-100 btn btn-lg btn-primary" type="submit" name="typedo" value="connect">Connect</button>
-
+                        <!--Tools-->
                         {if sing-up_dataBase}
                         <h3>Tools:</h3>
                         <div class="form-floating">
@@ -113,7 +113,7 @@
                         <div class="container" id="rowFormEdit">
                         </div>
                         
-                        
+                        <!--Admin's tools-->
                         {if isadmin}
                         <h4>Admin's tools:</h4>
                         <h5>Add/Del User:</h5>
@@ -147,17 +147,19 @@
                         {end sing-up_dataBase}
                     </form>
                 </div>
+                <!--list users-->
                 {if sing-up_dataBase}
                 <div class="col-md-2 text-center">
                     <table class="table table-striped table-hover caption-top" id="listdatabases">
                         <caption>Available users</caption>
                         {loop listdb}
-                        <tr onclick="onclick_to_row_list_databases();">
+                        <tr onclick="onclick_to_row_list_databases(event);">
                             <td>{listdb.value}</td>
                         </tr>
                         {end listdb}
                     </table>
                 </div>
+                <!--list tables-->
                 {if listTablesNotNull}
                 <div class="col-md-6 text-center">
                     <table class="table table-striped table-hover caption-top" id="listtables">
@@ -175,6 +177,7 @@
                 {end listTablesNotNull}
                 {end sing-up_dataBase}
             </div>
+            <!--response-->
             {if response_not_null}
             <div class="row">
                 <div class="col">

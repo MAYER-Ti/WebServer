@@ -76,8 +76,8 @@ function onclick_to_row_list_tables(event){
         }
     }
 }
-function onclick_to_row_list_databases(){
-    //console.log('Click! list databases');
+function onclick_to_row_list_databases(event){
+    console.log(event.target.innerText);
 }
 
 function CountColumnsOfTable(nameSearchTable){
