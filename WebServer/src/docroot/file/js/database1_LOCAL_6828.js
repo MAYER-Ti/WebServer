@@ -76,12 +76,8 @@ function onclick_to_row_list_tables(event){
         }
     }
 }
-function onclick_to_row_list_databases(event){
-    var clickedUser = event.target.innerText;
-    formElements.userName.value = clickedUser;
-    var fildsuser = formElements.doinguser;
-    for(i = 0; i < fildsuser.length; i++)
-        fildsuser[i].value = clickedUser;
+function onclick_to_row_list_databases(){
+    //console.log('Click! list databases');
 }
 
 function CountColumnsOfTable(nameSearchTable){

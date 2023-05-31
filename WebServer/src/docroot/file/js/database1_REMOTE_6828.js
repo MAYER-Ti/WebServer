@@ -76,25 +76,18 @@ function onclick_to_row_list_tables(event){
         }
     }
 }
-function onclick_to_row_list_databases(event){
-    var clickedUser = event.target.innerText;
-    formElements.userName.value = clickedUser;
-    var fildsuser = formElements.doinguser;
-    for(i = 0; i < fildsuser.length; i++)
-        fildsuser[i].value = clickedUser;
+function onclick_to_row_list_databases(){
+    //console.log('Click! list databases');
 }
 
 function CountColumnsOfTable(nameSearchTable){
-    var rows = document.querySelectorAll("#listtables tbody tr");
-    console.log(rows);
-    var columns;
+    var rows = document.querySelectorAll("#listtables tr");
+    var columnsText;
     var listColumnsOfTable = [];
     for(i = 0; i < rows.length; i++){
-
-        columns = rows[i].children; //.outerText.split('\t')
-        console.log(columns);
-        if(columns[0].innerText == nameSearchTable){
-            listColumnsOfTable.push(columns[1].innerText);
+        columnsText = rows[""+i].outerText.split('\t');
+        if(columnsText[0] == nameSearchTable){
+            listColumnsOfTable.push(columnsText[1]);
         }
     }
     return listColumnsOfTable;

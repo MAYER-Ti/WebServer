@@ -50,22 +50,17 @@ void RegisterController::service(HttpRequest &request, HttpResponse &response)
                 else
                     qDebug() << "insert new user failed!";
             }
-
             // show request log & pass
             qDebug() << "RegisterController: Request username=" << requestUsername;
             qDebug() << "RegisterController: Request password=" << requestPassword;
             qDebug() << "RegisterController: Session username=" << sessionUsername;
             qDebug() << "RegisterController: Session idrole=" << sessionIdRole;
-
         }
-
-
     }
     //close connection to db
     userDataBase.CloseDb();
     //set http header
     response.setHeader("Content-Type", "text/html; charset=UTF-8");
-
     //set template
     Template temp = templateCache->getTemplate("register", language);
     temp.setCondition("logged-in", session.contains("username"));

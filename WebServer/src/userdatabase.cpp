@@ -11,9 +11,7 @@ bool UserDataBase::isUser(QString userLogin, QString userPass)
     }
     QSqlQuery query(m_ndb);
     QString pasCode = UserDataBase::encodeStr(userPass);
-    QString sqlReq = QString("SELECT loginuser, passworduser FROM logusers WHERE loginuser = '%1' AND passworduser = '%2';")
-            .arg(userLogin)
-            .arg(pasCode);
+    QString sqlReq = QString("SELECT loginuser, passworduser FROM logusers WHERE loginuser = '%1' AND passworduser = '%2';").arg(userLogin).arg(pasCode);
     if(!query.exec(sqlReq)){
         qDebug() << "isUser: Error - " << query.lastError().text();
         return false;
@@ -58,11 +56,7 @@ bool UserDataBase::InputNewUser(QString userLogin, QString userYear, QString use
         groupIdText ="NULL";
     }
     sqlReq = QString("INSERT INTO logusers(loginUser, yearUser, passwordUser, groupid)"
-                     "VALUES('%1', '%2', '%3', %4);")
-            .arg(userLogin)
-            .arg(userYear)
-            .arg(pasCode)
-            .arg(groupIdText);
+                     "VALUES('%1', '%2', '%3', %4);").arg(userLogin).arg(userYear).arg(pasCode).arg(groupIdText);
     if(!query.exec(sqlReq)){
         qDebug() << "UserDataBase: InputNewUser - insert - " << query.lastError().text();
         m_ndb.close();
@@ -125,25 +119,6 @@ bool UserDataBase::DropUser(QString userLogin, QString codeUserPass)
     return true;
 }
 
-//QString encodeStr(const QString& str)
-//{
-//    QByteArray arr(str.toUtf8());
-//    for(int i =0; i<arr.size(); i++)
-//        arr[i] = arr[i] ^ key;
-
-//    return QString::fromAscii(arr.toBase64());
-//}
-
-//QString decodeStr(const QString &str)
-//{
-//    QByteArray arr = QByteArray::fromBase64(str.toAscii());
-//    for(int i =0; i<arr.size(); i++)
-//        arr[i] =arr[i] ^ key;
-
-//    return QString::fromUtf8(arr);
-//}
-
-
 QString UserDataBase::encodeStr(QString str, quint32 key)
 {
     QByteArray result(str.toUtf8());
@@ -200,7 +175,6 @@ QList<QList<QString>> UserDataBase::getRequest(QString sqlReq)
         m_ndb.close();
         return rows;
     }
-//    qDebug() << rows;
     qDebug() << "DataBaseController: row count:" << rows.count();
     qDebug() << "DataBaseController: column count:" << rows[0].count();
     m_ndb.close();
@@ -353,13 +327,7 @@ bool UserDataBase::CreateLink(QString tbName, QString poleTbName, QString fromTb
         return false;
     }
     sqlReq = QString("ALTER TABLE %1 ADD CONSTRAINT FK_%2_%3 FOREIGN KEY (%4) "
-                     "REFERENCES %5 (%6) ON DELETE CASCADE;")
-            .arg(tbName)
-            .arg(tbName)
-            .arg(poleTbName)
-            .arg(poleTbName)
-            .arg(fromTbName)
-            .arg(fromPoleTbName);
+                     "REFERENCES %5 (%6) ON DELETE CASCADE;").arg(tbName).arg(tbName).arg(poleTbName).arg(poleTbName).arg(fromTbName).arg(fromPoleTbName);
     isExcepion = !query.exec(sqlReq);
     if(isExcepion){
         qDebug() << "UserDataBase: CreateLink - " << query.lastError().text();
@@ -381,41 +349,45 @@ bool UserDataBase::SetIdGroup(QString userLogin, QString groupId)
                              "SET groupid = '%1' "
                              "WHERE loginUser = '%2'").arg(groupId).arg(userLogin);
     if(!query.exec(sqlReq)){
-        qDebug() << "UserDataBase: SetIdGroup - update -" << m_ndb.lastError().text();
+        qDebug() << "UserDataBase: SetIdGroup - update -" << query.lastError().text();
         m_ndb.close();
         return false;
     }
-
-    sqlReq = QString("GRANT SELECT ON TABLE public.logroles TO %1;").arg(userLogin);
+    sqlReq = QString("GRANT SELECT ON TABLE public.logroles TO %1_user;").arg(userLogin);
     if(!query.exec(sqlReq)){
-        qDebug() << "UserDataBase: Grand logroles -" << m_ndb.lastError().text();
+        qDebug() << "UserDataBase: Grand logroles -" << query.lastError().text();
         m_ndb.close();
         return false;
     }
-    sqlReq = QString("GRANT SELECT ON TABLE public.logusers TO %1;").arg(userLogin);
+    sqlReq = QString("GRANT SELECT ON TABLE public.logusers TO %1_user;").arg(userLogin);
     if(!query.exec(sqlReq)){
-        qDebug() << "UserDataBase: Grand logusers -" << m_ndb.lastError().text();
+        qDebug() << "UserDataBase: Grand logusers -" << query.lastError().text();
         m_ndb.close();
         return false;
     }
-    sqlReq = QString("GRANT SELECT ON TABLE public.logusersrols TO TO %1;").arg(userLogin);
+    sqlReq = QString("GRANT SELECT ON TABLE public.logusersrols TO %1_user;").arg(userLogin);
     if(!query.exec(sqlReq)){
-        qDebug() << "UserDataBase: Grand logusersrols -" << m_ndb.lastError().text();
+        qDebug() << "UserDataBase: Grand logusersrols -" << query.lastError().text();
         m_ndb.close();
         return false;
     }
     sqlReq = QString("GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres;");
     if(!query.exec(sqlReq)){
-        qDebug() << "UserDataBase: Grand all to postgres  -" << m_ndb.lastError().text();
+        qDebug() << "UserDataBase: Grand all to postgres  -" << query.lastError().text();
         m_ndb.close();
         return false;
     }
-
     return true;
 }
 
 bool UserDataBase::CreateConnectToDb(QString _hostName, QString _userName, QString _dbName, QString _pass)
 {
+    //remove old conection
+    if(m_ndb.isOpen()){
+        m_ndb.close();
+        m_ndb.removeDatabase(m_ndb.connectionName());
+    }
+    //create new connection
     m_ndb = QSqlDatabase::addDatabase("QPSQL", nameConnect);
     m_ndb.setHostName(_hostName);
     m_ndb.setUserName(_userName);
@@ -430,6 +402,11 @@ bool UserDataBase::CreateConnectToDb(QString _hostName, QString _userName, QStri
 
 bool UserDataBase::CreateConnectWithUser(QString userLogin)
 {
+    //remove old conection
+    if(m_ndb.isOpen()){
+        m_ndb.close();
+        m_ndb.removeDatabase(m_ndb.connectionName());
+    }
     if(!m_secdb.isOpen()){
         m_secdb = QSqlDatabase::addDatabase("QPSQL", "secConnect");
         m_secdb.setHostName(HOSTNAME);
@@ -452,6 +429,7 @@ bool UserDataBase::CreateConnectWithUser(QString userLogin)
     while(query.next()){
         pas = query.value("passworduser").toString();
     }
+    //create new connection
     m_ndb = QSqlDatabase::addDatabase("QPSQL", nameConnect);
     m_ndb.setHostName(HOSTNAME);
     m_ndb.setUserName(userLogin+"_user");
@@ -470,7 +448,6 @@ bool UserDataBase::InsertRow(QString tableName, QList<QByteArray> values)
         qDebug() << "UserDataBase: InsertRow - Open -" << m_ndb.lastError().text();
         return false;
     }
-
     QString sqlReq = QString("INSERT INTO %1 VALUES(%2").arg(tableName).arg(QString(values.at(0)));
     for(int i = 1; i < values.length(); i++){
         sqlReq += ", " + QString(values.at(i));
@@ -550,8 +527,6 @@ QList<QString> UserDataBase::getDbList(QString idRole, QString groupIdUser)
             return {};
         }
     }
-
-
     if(!m_ndb.open()){
         qDebug() << "UserDataBase: getDbList - Open -" << m_ndb.lastError().text();
         m_secdb.close();
@@ -563,10 +538,10 @@ QList<QString> UserDataBase::getDbList(QString idRole, QString groupIdUser)
     if(idRole == "1"){
         if(groupIdUser != ""){
             SqlReq = QString("SELECT loginuser "
-                                     "FROM public.logusersrols, public.logusers "
-                                     "WHERE logusersrols.iduser = logusers.id "
-                                     "AND logusersrols.idrole = 1 "
-                                     "AND logusers.groupid = '%1';").arg(groupIdUser);
+                             "FROM public.logusersrols, public.logusers "
+                             "WHERE logusersrols.iduser = logusers.id "
+                             "AND logusersrols.idrole = 1 "
+                             "AND logusers.groupid = '%1';").arg(groupIdUser);
             if(!query.exec(SqlReq)){
                 qDebug() << "UserDataBase: getDbList - SELECT -" << query.lastError();
                 m_ndb.close();
@@ -583,8 +558,8 @@ QList<QString> UserDataBase::getDbList(QString idRole, QString groupIdUser)
     }
     else if(idRole == "0"){
         SqlReq = QString("SELECT loginuser "
-                                 "FROM logusersrols, logusers "
-                                 "WHERE logusersrols.iduser = logusers.id;");
+                         "FROM logusersrols, logusers "
+                         "WHERE logusersrols.iduser = logusers.id;");
         qDebug() << "UserDataBase: sql -" << SqlReq;
         if(!query.exec(SqlReq)){
             qDebug() << "UserDataBase: getDbList - SELECT -" << query.lastError();
@@ -636,60 +611,51 @@ bool UserDataBase::CreateDB()
 {
     QSqlQuery query(m_ndb);
     bool isWorked;
+    isWorked = query.exec("CREATE SEQUENCE IF NOT EXISTS id_seq_users "
+                          "INCREMENT 1 "
+                          "MINVALUE 1 "
+                          "MAXVALUE 9223372036854775807 "
+                          "START 2 "
+                          "CACHE 1;");
+    if(!isWorked)
+        qDebug() << "Userdatabase: create sequence user:" << m_ndb.lastError();
 
-
-    //GRANT SELECT ON TABLE public.logusers TO slava_user;
-
-    //GRANT SELECT ON TABLE public.logusers TO sasha_user;
-    //GRANT SELECT ON TABLE public.logusersrols TO slava_user;
-
-    //GRANT SELECT ON TABLE public.logusersrols TO sasha_user;
-
-        isWorked = query.exec("CREATE SEQUENCE IF NOT EXISTS id_seq_users "
-                               "INCREMENT 1 "
-                               "MINVALUE 1 "
-                               "MAXVALUE 9223372036854775807 "
-                               "START 2 "
-                               "CACHE 1;");
-        if(!isWorked)
-            qDebug() << "Userdatabase: create sequence user:" << m_ndb.lastError();
-
-        isWorked = query.exec("CREATE SEQUENCE IF NOT EXISTS id_seq_rols "
-                               "INCREMENT 1 "
-                               "MINVALUE 1 "
-                               "MAXVALUE 9223372036854775807 "
-                               "START 2 "
-                               "CACHE 1;");
-        if(!isWorked)
-            qDebug() << "Userdatabase: create sequence user:" << m_ndb.lastError();
+    isWorked = query.exec("CREATE SEQUENCE IF NOT EXISTS id_seq_rols "
+                          "INCREMENT 1 "
+                          "MINVALUE 1 "
+                          "MAXVALUE 9223372036854775807 "
+                          "START 2 "
+                          "CACHE 1;");
+    if(!isWorked)
+        qDebug() << "Userdatabase: create sequence user:" << m_ndb.lastError();
     isWorked = query.exec("CREATE TABLE IF NOT EXISTS logroles ("
-                           "id INT NOT NULL , " //DEFAULT nextval('id_seq'::regclass)
-                           "nameRole text, "
-                           "CONSTRAINT PK_logroles PRIMARY KEY (id)"
-                           ");");
+                          "id INT NOT NULL , "
+                          "nameRole text, "
+                          "CONSTRAINT PK_logroles PRIMARY KEY (id)"
+                          ");");
     if(!isWorked)
         qDebug() << "Userdatabase: create tb1:" << m_ndb.lastError();
 
     isWorked = query.exec("CREATE TABLE IF NOT EXISTS logusers ("
-                           "id INT NOT NULL , " //DEFAULT nextval('id_seq'::regclass)
-                           "loginuser text,"
-                           "yearuser text,"
-                           "passworduser text,"
-                           "groupid text,"
-                           "CONSTRAINT PK_logusers PRIMARY KEY (id)"
-                           ");");
+                          "id INT NOT NULL , "
+                          "loginuser text,"
+                          "yearuser text,"
+                          "passworduser text,"
+                          "groupid text,"
+                          "CONSTRAINT PK_logusers PRIMARY KEY (id)"
+                          ");");
     if(!isWorked)
         qDebug() << "Userdatabase: create tb2:" << m_ndb.lastError();
 
     isWorked = query.exec("CREATE TABLE IF NOT EXISTS logusersrols ("
-                           "idUser INT NOT NULL,"
-                           "idRole INT NOT NULL,"
-                           "CONSTRAINT PK_logusersrols PRIMARY KEY (idUser, idRole),"
-                           "CONSTRAINT FK_logusersrols_idUser FOREIGN KEY (idUser)"
-                           "REFERENCES logusers (id) ON DELETE CASCADE,"
-                           "CONSTRAINT FK_logusersrols_idRole FOREIGN KEY (idRole)"
-                           "REFERENCES logroles (id) ON DELETE CASCADE"
-                           ");");
+                          "idUser INT NOT NULL,"
+                          "idRole INT NOT NULL,"
+                          "CONSTRAINT PK_logusersrols PRIMARY KEY (idUser, idRole),"
+                          "CONSTRAINT FK_logusersrols_idUser FOREIGN KEY (idUser)"
+                          "REFERENCES logusers (id) ON DELETE CASCADE,"
+                          "CONSTRAINT FK_logusersrols_idRole FOREIGN KEY (idRole)"
+                          "REFERENCES logroles (id) ON DELETE CASCADE"
+                          ");");
     if(!isWorked)
         qDebug() << "Userdatabase: create tb3:" << m_ndb.lastError();
 
@@ -705,8 +671,6 @@ bool UserDataBase::CreateDB()
     if(!isWorked)
         qDebug() << "Userdatabase: insert usersrols:" << m_ndb.lastError();
 
-//    isWorked = query.exec("ALTER TABLE IF EXISTS public.logusers "
-//    "ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (INCREMENT 1 START 2);");
     isWorked = query.exec("ALTER TABLE IF EXISTS logusers ALTER COLUMN id SET DEFAULT nextval('id_seq_users');");
     if(!isWorked)
         qDebug() << "Userdatabase: add sequence logusers:" << m_ndb.lastError();
@@ -718,8 +682,6 @@ bool UserDataBase::CreateDB()
     if(!isWorked){
         qDebug() << "UserDataBase: Grand all to postgres -" << m_ndb.lastError().text();
     }
-
-
     m_ndb.close();
     return isWorked;
 }
@@ -733,42 +695,3 @@ UserDataBase::UserDataBase(QObject *parent) : QObject(parent)
 {
     nameConnect = "default_db_connect";
 }
-
-///sql code
-////////////////////////////////////////////////
-///log tables auto create
-/**
-
-CREATE TABLE IF NOT EXISTS logroles (
-        id INT NOT NULL,
-                nameRole text,
-                CONSTRAINT PK_logroles PRIMARY KEY (id)
-);
-CREATE TABLE IF NOT EXISTS logusers (
-        id INT NOT NULL,
-                loginUser text,
-                yearUser INT,
-                passwordUser text,
-                CONSTRAINT PK_logusers PRIMARY KEY (id)
-);
-CREATE TABLE IF NOT EXISTS logusersrols (
-                idUser INT NOT NULL,
-                idRole INT NOT NULL,
-                CONSTRAINT PK_logusersrols PRIMARY KEY (idUser, idRole),
-                CONSTRAINT FK_logusersrols_idUser FOREIGN KEY (idUser)
-            REFERENCES logusers (id) ON DELETE CASCADE,
-        CONSTRAINT FK_logusersrols_idRole FOREIGN KEY (idRole)
-            REFERENCES logroles (id) ON DELETE CASCADE
-);
-
-////////////////////
-///sequence
-
-CREATE SEQUENCE public.id_seq
-  INCREMENT 1
-  MINVALUE 1
-  MAXVALUE 9223372036854775807
-  START 1
-  CACHE 1;
-
-*/

@@ -26,13 +26,11 @@ void LoginController::service(HttpRequest &request, HttpResponse &response)
         QByteArray requestPassword = request.getParameter("password");;
         if(requestUsername != "" && requestPassword != ""){
             //connect or create dbLog if does not exist
-
             bool isUser = userDataBase.isUser(requestUsername, requestPassword);
             qDebug() << "LoginController: isUser - " << isUser;
 
-
             //log-in
-            if(sessionUsername == "" && isUser/*requestUsername == "admin" && requestPassword == "admin"*/){
+            if(sessionUsername == "" && isUser){
                 int idRole = userDataBase.getIdRoleFromUser(requestUsername);
 
                 session.set("username", requestUsername);

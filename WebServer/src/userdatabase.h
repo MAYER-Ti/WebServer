@@ -14,7 +14,7 @@
 #define HOSTNAME "localhost"
 #define USERNAME "postgres"
 #define DBNAME "postgres"
-#define PASS ""
+#define PASS "12345678"
 
 class UserDataBase : public QObject
 {

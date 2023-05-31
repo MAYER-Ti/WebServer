@@ -53,8 +53,6 @@ function onclick_to_row_list_tables(event){
     }
     else if(nameCell == "column_name"){
         txtNamePole.value = valueCell;
-
-
     }
     else if(nameCell == "data_type"){
         if(valueCell == "int"){
@@ -77,14 +75,12 @@ function onclick_to_row_list_tables(event){
     }
 }
 function onclick_to_row_list_databases(event){
-    var clickedUser = event.target.innerText;
-    formElements.userName.value = clickedUser;
-    var fildsuser = formElements.doinguser;
-    for(i = 0; i < fildsuser.length; i++)
-        fildsuser[i].value = clickedUser;
+    console.log(event.target.innerText);
+
 }
 
 function CountColumnsOfTable(nameSearchTable){
+
     var rows = document.querySelectorAll("#listtables tbody tr");
     console.log(rows);
     var columns;
@@ -95,6 +91,13 @@ function CountColumnsOfTable(nameSearchTable){
         console.log(columns);
         if(columns[0].innerText == nameSearchTable){
             listColumnsOfTable.push(columns[1].innerText);
+    var rows = document.querySelectorAll("#listtables tr");
+    var columnsText;
+    var listColumnsOfTable = [];
+    for(i = 0; i < rows.length; i++){
+        columnsText = rows[""+i].outerText.split('\t');
+        if(columnsText[0] == nameSearchTable){
+            listColumnsOfTable.push(columnsText[1]);
         }
     }
     return listColumnsOfTable;

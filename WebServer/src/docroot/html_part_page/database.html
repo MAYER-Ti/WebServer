@@ -58,21 +58,52 @@
                     <form method="POST" id="mainForm">
 
                         <h3>Connect:</h3>
-                        <div class="form-floating">
+                        <!--<div class="form-floating">
                             <input type="text" class="form-control" placeholder="name" name="dbname" value="{namedb}">
                             <label for="floatingInput">database name</label>
-                        </div>
+                        </div>-->
                         <div class="form-floating">
                             <input type="text" class="form-control" placeholder="username" name="userName" value="{usernamedb}">
                             <label for="floatingInput">Username</label>
                         </div>
-                        <div class="form-floating">
+                        <!--<div class="form-floating">
                             <input type="password" class="form-control" placeholder="password" name="password" value="{passworddb}">
                             <label for="floatingInput">Password</label>
-                        </div>
+                        </div>-->
                         <button class="w-100 btn btn-lg btn-primary" type="submit" name="typedo" value="connect">Connect</button>
-                        <!--Tools-->
                         {if sing-up_dataBase}
+                        <!--Admin's tools-->
+                        {if isadmin}
+                        <h4>Admin's tools:</h4>
+                        <h5>Add/Del User:</h5>
+                        <div class="form-floating">
+                            <input type="text" class="form-control"  name="doinguser">
+                            <label for="flexCheckDefault">DoingUser</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="text" class="form-control"  name="doinguserpass">
+                            <label for="flexCheckDefault">Doing user code pass</label>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <button class="w-100 btn btn-lg btn-success" name="typedo" value="create_user">Create</button>
+                            </div>
+                            <div class="col">
+                                <button class="w-100 btn btn-lg btn-warning" type="submit" name="typedo" value="drop_user">Drop</button>
+                            </div>
+                        </div>
+                        <h5>Set group id:</h5>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="doinguser">
+                            <label>user login</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" name="groupid">
+                            <label>Group id</label>
+                        </div>
+                        <button class="w-100 btn btn-lg btn-success" type="submit" name="typedo" value="set_groupid">Set</button>
+                        {end isadmin}
+                        <!--Tools-->
                         <h3>Tools:</h3>
                         <div class="form-floating">
                             <textarea type="text" class="form-control" id="sql" placeholder="SELECT * FROM table WHERE 1;" name="sqlRequest" cols="40" rows="3">{sqlreqdb}</textarea>
@@ -113,37 +144,7 @@
                         <div class="container" id="rowFormEdit">
                         </div>
                         
-                        <!--Admin's tools-->
-                        {if isadmin}
-                        <h4>Admin's tools:</h4>
-                        <h5>Add/Del User:</h5>
-                        <div class="form-floating">
-                            <input type="text" class="form-control"  name="doinguser">
-                            <label for="flexCheckDefault">DoingUser</label>
-                        </div>
-                        <div class="form-floating">
-                            <input type="text" class="form-control"  name="doinguserpass">
-                            <label for="flexCheckDefault">Doing user code pass</label>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <button class="w-100 btn btn-lg btn-success" name="typedo" value="create_user">Create</button>
-                            </div>
-                            <div class="col">
-                                <button class="w-100 btn btn-lg btn-warning" type="submit" name="typedo" value="drop_user">Drop</button>
-                            </div>
-                        </div>
-                        <h5>Set group id:</h5>
-                        <div class="form-floating">
-                            <input type="text" class="form-control" name="doinguser">
-                            <label>user login</label>
-                        </div>
-                        <div class="form-floating">
-                            <input type="text" class="form-control" name="groupid">
-                            <label>Group id</label>
-                        </div>
-                        <button class="w-100 btn btn-lg btn-success" type="submit" name="typedo" value="set_groupid">Set</button>
-                        {end isadmin}
+
                         {end sing-up_dataBase}
                     </form>
                 </div>

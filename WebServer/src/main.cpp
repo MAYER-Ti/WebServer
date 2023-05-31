@@ -51,9 +51,6 @@ int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
     app.addLibraryPath(app.applicationDirPath()+"/plugins");
-    //QString pathIni = "/home/Projects/WebServer/WebServer/etc/webserver.ini";
-    //QString pathIni = "F:/praktika/WebServer/WebServer/etc/webserver.ini";
-    //QString pathIni = "/run/user/1000/media/by-uuid-5070-0F3F/praktika/WebServer/WebServer/etc/webserver.ini";
     QString pathIni = searchConfigFile();
 
     //Session store

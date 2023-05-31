@@ -29,7 +29,7 @@ void RequestMapper::service(HttpRequest &request, HttpResponse &response)
             m_login.CloseDb();
             m_reg.CloseDb();
             m_database.LogOut();
-            qDebug() << "!! DELETED!";
+            qDebug() << "RequestMapper: log out";
         }
         response.redirect("/login");
         return;
