@@ -27,7 +27,6 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
     QString requestUserName;
     QString requestPassword;
     QString requestSqlReq;
-    QString requestHostName = "localhost";
     //get var in request
     //var database
     if(idRole == ADMIN){
@@ -69,31 +68,43 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
     temp.setVariable("doingtbnamedb", requestDoingTbName);
     temp.setVariable("namepoledb", requestColumnName);
 
-    //Connect to db
-    if(((requestTypedo == "") || (idRole == CLIENT && requestPassword == "")) && (!userDataBase.IsConnect())){
-        qDebug() << "DataBaseController: No parameters";
-        qDebug() << "namedb:" << requestdbName << "usernamedb:" << requestUserName << "hostnamedb:" << requestHostName << "password:" << requestPassword;
-        temp.setCondition("response_not_null", false);
-        qDebug() << "DataBaseController: setCondition - response_not_null - " << false;
-        temp.setCondition("sing-up_dataBase", false);
-        qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << false;
-        temp.setCondition("listTablesNotNull", false);
-        qDebug() << "DataBaseController: setCondition - listTablesNotNull - " << false;
-        temp.setCondition("message", false);
-        qDebug() << "DataBaseController: setCondition - message - " << false;
-    }
-    else if(!requestdbName.isEmpty() &&
-            !requestUserName.isEmpty() &&
-            !requestHostName.isEmpty() &&
-            requestTypedo == "connect"){
-        qDebug() << "DataBaseController: Connection";
-        qDebug() << "DataBaseController: dbname - " << requestdbName;
-        qDebug() << "DataBaseController: username - " << requestUserName;
-        qDebug() << "DataBaseController: hostName - " << requestHostName;
-        qDebug() << "DataBaseController: password - " << requestPassword;
-
+    //first connect
+    if((requestTypedo == "") && (!userDataBase.IsConnect())){
         if(idRole == ADMIN){
-            if(userDataBase.CreateConnectToDb(requestHostName , requestUserName, requestdbName, requestPassword)){
+            if(userDataBase.CreateConnectToDb()){
+                qDebug() << "DataBaseController: connect admin";
+                qDebug() << "DataBaseController: db connect succesed!";
+                temp.setVariable("messagetext", "Status: Connect to database successed!");
+                temp.setCondition("sing-up_dataBase", true);
+                qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << true;
+            }
+            else{
+                qDebug() << "DataBaseController: db connect faild!";
+                temp.setVariable("messagetext", "Status: Connect to database faild!");
+                temp.setCondition("sing-up_dataBase", false);
+                qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << false;
+            }
+        }
+        if(idRole == CLIENT){
+            if(userDataBase.CreateConnectWithUser(username)){
+                qDebug() << "DataBaseController: connect client";
+                qDebug() << "DataBaseController: db connect succesed!";
+                temp.setVariable("messagetext", " Status: Connect to database successed!");
+            }
+            else{
+                qDebug() << "DataBaseController: db connect faild!";
+                temp.setVariable("messagetext", "Status: Connect to database faild!");
+                temp.setCondition("sing-up_dataBase", false);
+                qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << false;
+            }
+        }
+    }
+    //connect
+    if((requestTypedo == "connect")){
+        qDebug() << "DataBaseController: Connection";
+        qDebug() << "DataBaseController: username - " << username;
+        if(idRole == ADMIN && requestUserName == ""){
+            if(userDataBase.CreateConnectToDb()){
                 qDebug() << "DataBaseController: connect admin";
                 qDebug() << "DataBaseController: db connect succesed!";
                 temp.setVariable("messagetext", "Status: Connect to database successed!");
@@ -106,7 +117,7 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
             }
         }
         else if(idRole == CLIENT){
-            if(requestUserName == "postgres" || requestdbName == "postgres"){
+            if(username == "postgres"){
                 qDebug() << "DataBaseController: no access to connect!";
                 temp.setVariable("messagetext", "Status: No access to connect!");
                 temp.setCondition("response_not_null", false);
@@ -116,7 +127,7 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
                 qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << false;
             }
             else{
-                if(userDataBase.CreateConnectToDb(/*requestHostName*/ "localhost", requestUserName, requestdbName, requestPassword)){
+                if(userDataBase.CreateConnectWithUser(username)){
                     qDebug() << "DataBaseController: db connect succesed!";
                     temp.setVariable("messagetext", " Status: Connect to database successed!");
                 }
@@ -276,6 +287,7 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
     if(userDataBase.IsConnect()){
         temp.setCondition("sing-up_dataBase", true);
         qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << true;
+
         //show a list of databases
         qDebug() << "DataBaseController: show a list of databases";
         QList<QString> dbList = userDataBase.getDbList(idRole, groupId);

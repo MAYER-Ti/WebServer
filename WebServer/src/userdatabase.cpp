@@ -125,26 +125,41 @@ bool UserDataBase::DropUser(QString userLogin, QString codeUserPass)
     return true;
 }
 
+//QString encodeStr(const QString& str)
+//{
+//    QByteArray arr(str.toUtf8());
+//    for(int i =0; i<arr.size(); i++)
+//        arr[i] = arr[i] ^ key;
 
+//    return QString::fromAscii(arr.toBase64());
+//}
 
+//QString decodeStr(const QString &str)
+//{
+//    QByteArray arr = QByteArray::fromBase64(str.toAscii());
+//    for(int i =0; i<arr.size(); i++)
+//        arr[i] =arr[i] ^ key;
+
+//    return QString::fromUtf8(arr);
+//}
 
 
 QString UserDataBase::encodeStr(QString str, quint32 key)
 {
-    QByteArray result = str.toLocal8Bit();
-    for(int i = 0; i < str.size(); i++)
+    QByteArray result(str.toUtf8());
+    for(int i = 0; i < result.size(); i++)
         result[i] = result[i] ^ key;
 
-    return QString::fromUtf8(result.toBase64());
+    return QString::fromLatin1(result.toBase64());
 }
 
 QString UserDataBase::decodeStr(QString str, quint32 key)
 {
-    QByteArray result = str.toLocal8Bit();
-    for(int i = 0; i < str.size(); i++)
+    QByteArray result = QByteArray::fromBase64(str.toLatin1());
+    for(int i = 0; i < result.size(); i++)
         result[i] = result[i] ^ key;
 
-    return QString::fromUtf8(result.toBase64());
+    return QString::fromUtf8(result);
 }
 
 QList<QList<QString>> UserDataBase::getRequest(QString sqlReq)
@@ -406,6 +421,42 @@ bool UserDataBase::CreateConnectToDb(QString _hostName, QString _userName, QStri
     m_ndb.setUserName(_userName);
     m_ndb.setDatabaseName(_dbName);
     m_ndb.setPassword(_pass);
+    if(!m_ndb.open()){
+        qDebug() << m_ndb.lastError().text();
+        return false;
+    }
+    return true;
+}
+
+bool UserDataBase::CreateConnectWithUser(QString userLogin)
+{
+    if(!m_secdb.isOpen()){
+        m_secdb = QSqlDatabase::addDatabase("QPSQL", "secConnect");
+        m_secdb.setHostName(HOSTNAME);
+        m_secdb.setUserName(USERNAME);
+        m_secdb.setDatabaseName(DBNAME);
+        m_secdb.setPassword(PASS);
+        if(!m_secdb.open()){
+            qDebug() << "UserDataBase: CreateConnectWithUser - Open sec db -" << m_secdb.lastError().text();
+            return false;
+        }
+    }
+    QSqlQuery query(m_secdb);
+    QString sqlReq = QString("SELECT passworduser FROM logusers WHERE loginuser = '%1';").arg(userLogin);
+    if(!query.exec(sqlReq)){
+        qDebug() << "UserDataBase: CreateConnectWithUser - select  -" << m_secdb.lastError().text();
+        m_secdb.close();
+        return false;
+    }
+    QString pas = "";
+    while(query.next()){
+        pas = query.value("passworduser").toString();
+    }
+    m_ndb = QSqlDatabase::addDatabase("QPSQL", nameConnect);
+    m_ndb.setHostName(HOSTNAME);
+    m_ndb.setUserName(userLogin+"_user");
+    m_ndb.setDatabaseName(userLogin+"_db");
+    m_ndb.setPassword(UserDataBase::decodeStr(pas));
     if(!m_ndb.open()){
         qDebug() << m_ndb.lastError().text();
         return false;

@@ -53,6 +53,7 @@ public:
     bool CreateLink(QString tbName, QString poleTbName, QString fromTbName, QString fromPoleTbName);
     bool SetIdGroup(QString userLogin, QString groupId);
     bool CreateConnectToDb(QString _hostName = HOSTNAME, QString _userName = USERNAME, QString _dbName = DBNAME, QString _pass = PASS);
+    bool CreateConnectWithUser(QString userLogin);
     bool InsertRow(QString tableName, QList<QByteArray> values);
     bool DropColumn(QString tableName, QString columnName);
     bool InsertColumn(QString tableName, QString columnName, QString dataType, bool isPK);
