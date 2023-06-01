@@ -63,7 +63,7 @@ public:
     bool CreateDB();
     bool isUser(QString userLogin, QString userPass);
     bool InputNewUser(QString userLogin, QString userYear, QString userPass, QString groupIdText = "NULL");
-    bool DropUser(QString userLogin, QString codeUserPass);
+    bool DropUser(QString userLogin);
 
 };
 

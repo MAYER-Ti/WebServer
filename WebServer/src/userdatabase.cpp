@@ -88,32 +88,51 @@ bool UserDataBase::InputNewUser(QString userLogin, QString userYear, QString use
     return true;
 }
 
-bool UserDataBase::DropUser(QString userLogin, QString codeUserPass)
+bool UserDataBase::DropUser(QString userLogin)
 {
-    if(!m_ndb.open()){
-        qDebug() << "UserDataBase: DropUser - Open - " << m_ndb.lastError().text();
-        return false;
+    if(!m_secdb.isOpen()){
+        m_secdb = QSqlDatabase::addDatabase("QPSQL", "secConnect");
+        m_secdb.setHostName(HOSTNAME);
+        m_secdb.setUserName(USERNAME);
+        m_secdb.setDatabaseName(DBNAME);
+        m_secdb.setPassword(PASS);
+        if(!m_secdb.open()){
+            qDebug() << "UserDataBase: CreateConnectWithUser - Open sec db -" << m_secdb.lastError().text();
+            return false;
+        }
     }
-    QSqlQuery query(m_ndb);
-    QString sqlReq = QString("DELETE FROM logusers WHERE loginuser = '%1' AND passworduser='%2';")
-            .arg(userLogin).arg(codeUserPass);
+//    if(!m_ndb.open()){
+//        qDebug() << "UserDataBase: DropUser - Open - " << m_ndb.lastError().text();
+//        return false;
+//    }
+    QSqlQuery query(m_secdb);
+    QString sqlReq = QString("DELETE FROM logusers WHERE loginuser = '%1';")
+            .arg(userLogin);
     if(!query.exec(sqlReq)){
         qDebug() << "UserDataBase: DropUser - delete - " << query.lastError().text();
-        m_ndb.close();
+        m_secdb.close();
         return false;
     }
     sqlReq = QString("DROP DATABASE IF EXISTS %1_db;")
             .arg(userLogin);
     if(!query.exec(sqlReq)){
         qDebug() << "UserDataBase: DropUser - drop user- " << query.lastError().text();
-        m_ndb.close();
+        m_secdb.close();
+        return false;
+    }
+
+    sqlReq = QString("DROP OWNED BY %1_user;")
+            .arg(userLogin);
+    if(!query.exec(sqlReq)){
+        qDebug() << "UserDataBase: DropUser - drop own user- " << query.lastError().text();
+        m_secdb.close();
         return false;
     }
     sqlReq = QString("DROP USER IF EXISTS %1_user;")
             .arg(userLogin);
     if(!query.exec(sqlReq)){
         qDebug() << "UserDataBase: DropUser - drop user- " << query.lastError().text();
-        m_ndb.close();
+        m_secdb.close();
         return false;
     }
     return true;

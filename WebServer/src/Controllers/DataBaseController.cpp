@@ -232,7 +232,6 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
     if(userDataBase.IsConnect() && requestTypedo == "create_user"){
         if((requestDoingUser != "" && requestDoingUserPass != "")){
             temp.setCondition("sing-up_dataBase", true);
-            //create user
             if(userDataBase.InputNewUser(requestDoingUser, "", UserDataBase::decodeStr(requestDoingUserPass), requestDoingUserIdGroup)){
                 qDebug() << "DataBaseController: input new user successed!";
                 temp.setVariable("messagetext", " Status: Input new user successed!");
@@ -250,10 +249,9 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
     }
     //drop user
     if(userDataBase.IsConnect() && requestTypedo == "drop_user"){
-        if((requestDoingUser != "" && requestDoingUserPass != "")){
+        if((requestDoingUser != "")){
             temp.setCondition("sing-up_dataBase", true);
-            //drop user
-            if(userDataBase.DropUser(requestDoingUser,requestDoingUserPass)){
+            if(userDataBase.DropUser(requestDoingUser)){
                 qDebug() << "DataBaseController: drop user successed!";
                 temp.setVariable("messagetext", " Status: drop user successed!");
             }
