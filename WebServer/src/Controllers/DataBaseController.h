@@ -21,7 +21,6 @@ public:
     explicit DataBaseController(QObject *parent = nullptr);
     void service(HttpRequest& request, HttpResponse& response);
     void LogOut();
-
 };
 
 #endif // DATABASECONTROLLER_H

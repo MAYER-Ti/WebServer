@@ -5,8 +5,8 @@
 LoginController::LoginController(QObject *parent)
     : HttpRequestHandler{parent}
 {
-    userDataBase.setNameConnect("loginDB_con");
-    if(userDataBase.CreateConnectToDb()){
+//    userDataBase.setNameConnect("loginDB_con");
+    if(userDataBase.CreateConnectToDb("localhost", "postgres", "postgres", "12345678", "Reg_con")){
         userDataBase.CreateDB();
         qDebug() << "LoginController: db connect succesed!";
     }

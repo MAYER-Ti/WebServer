@@ -16,12 +16,15 @@
 #define DBNAME "postgres"
 #define PASS "12345678"
 
+#define ADMIN "0"
+#define CLIENT "1"
+
 class UserDataBase : public QObject
 {
     Q_OBJECT
 private:
     QSqlDatabase m_ndb;
-    QString nameConnect;
+//    QString nameConnect;
     QSqlDatabase m_secdb;
 
 public:
@@ -32,10 +35,11 @@ public:
     static QString decodeStr(QString str, quint32 key = KEY_TO_PASS);
 
     QList<QList<QString>> getRequest(QString sqlReq);
+    bool HaveConnect(QString username);
 
 
-    void setNameConnect(QString _nameConnect){ nameConnect = _nameConnect; }
-    QString getNameConnect(){ return nameConnect; }
+//    void setNameConnect(QString _nameConnect){ nameConnect = _nameConnect; }
+//    QString getNameConnect(){ return nameConnect; }
     bool IsOpen(){ return m_ndb.isOpen(); }
     void CloseDb(){m_ndb.close(); }
     bool OpenDb(){ return m_ndb.open(); }
@@ -52,7 +56,7 @@ public:
     bool CreateColumn(QString tbName, QString columnName, QString columnType, bool isPK, bool isNotNull = true);
     bool CreateLink(QString tbName, QString poleTbName, QString fromTbName, QString fromPoleTbName);
     bool SetIdGroup(QString userLogin, QString groupId);
-    bool CreateConnectToDb(QString _hostName = HOSTNAME, QString _userName = USERNAME, QString _dbName = DBNAME, QString _pass = PASS);
+    bool CreateConnectToDb(QString _hostName = HOSTNAME, QString _userName = USERNAME, QString _dbName = DBNAME, QString _pass = PASS, QString _connectName = (QString(USERNAME)+"_con"));
     bool CreateConnectWithUser(QString userLogin);
     bool InsertRow(QString tableName, QList<QByteArray> values);
     bool DropColumn(QString tableName, QString columnName);

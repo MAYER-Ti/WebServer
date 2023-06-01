@@ -4,7 +4,7 @@
 RegisterController::RegisterController(QObject *parent)
     : HttpRequestHandler{parent}
 {
-    userDataBase.setNameConnect("RegisterDB_con");
+//    userDataBase.setNameConnect("RegisterDB_con");
     if(userDataBase.CreateConnectToDb()){
         qDebug() << "RegisterController: db connect succesed!";
         userDataBase.CreateDB();

@@ -34,9 +34,13 @@ void RequestMapper::service(HttpRequest &request, HttpResponse &response)
         response.redirect("/login");
         return;
     }
-    if (sessionId.isEmpty() && path != "/login" && path != "/register" && path != "/about"&& path != "/home") {
+    if (sessionId.isEmpty() && path != "/login" && path != "/register" && path != "/about" && path != "/home") {
         qDebug("RequestMapper: redirect to login page");
         response.redirect("/login");
+        return;
+    }
+    if(path == "/database" && username == ""){
+        response.redirect("/home");
         return;
     }
     if(path == "/"){

@@ -3,7 +3,7 @@
 DataBaseController::DataBaseController(QObject *parent)
     : HttpRequestHandler{parent}
 {
-    userDataBase.setNameConnect("mainDB_con");
+//    userDataBase.setNameConnect("mainDB_con");
 }
 
 void DataBaseController::service(HttpRequest &request, HttpResponse &response)
@@ -15,6 +15,9 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
     QByteArray language = request.getHeader("Accept-Language");
     qDebug("language=%s",qPrintable(language));
 
+
+
+
     response.setHeader("Content-Type", "text/html; charset=UTF-8");
     //get tamplate header
     Template temp = templateCache->getTemplate("database",language);
@@ -23,11 +26,8 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
     temp.setCondition("message", true);
 
     qDebug() << "DataBaseController: isadmin - " << (idRole == ADMIN);
-    QString requestUserName;
-    QString requestSqlReq;
-
-    requestUserName = request.getParameter("userName").constData();
-    requestSqlReq = request.getParameter("sqlRequest").constData();
+    QString requestUserName = request.getParameter("userName").constData();
+    QString requestSqlReq = request.getParameter("sqlRequest").constData();
 
     //instrument vars
     const QString requestDoingTbName = request.getParameter("doingtbname").constData();
@@ -37,7 +37,6 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
     const bool requestColumnIsPK = !request.getParameter("isPK").isEmpty();
     const QList<QByteArray> requestInsertValues = request.getParameters("input");
     const QList<QByteArray> requestDoingUsers = request.getParameters("doinguser");
-    qDebug() << requestDoingUsers;
     const QString requestDoingUser(requestDoingUsers.length() >= 2 ? requestDoingUsers[1].constData() : "");
     const QString requestDoingUserPass = request.getParameter("doinguserpass").constData();
     const QString requestDoingUserIdGroup = request.getParameter("groupid").constData();
@@ -89,7 +88,7 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
         qDebug() << "DataBaseController: Connection";
         qDebug() << "DataBaseController: username - " << requestUserName;
         if(idRole == ADMIN){
-            if(requestUserName != ""){
+            if(requestUserName != "" && requestUserName != "admin"){
                 if(userDataBase.CreateConnectWithUser(requestUserName)){
                     qDebug() << "DataBaseController: connect admin";
                     qDebug() << "DataBaseController: db connect succesed!";
@@ -103,21 +102,22 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
                 }
             }
             else{
-                if(userDataBase.CreateConnectToDb()){
-                    qDebug() << "DataBaseController: connect admin";
-                    qDebug() << "DataBaseController: db connect succesed!";
-                    temp.setVariable("messagetext", "Status: Connect to database successed!");
-                    temp.setCondition("sing-up_dataBase", true);
-                    qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << true;
-                }
-                else{
-                    qDebug() << "DataBaseController: db connect faild!";
-                    temp.setVariable("messagetext", "Status: Connect to database faild!");
-                    temp.setCondition("sing-up_dataBase", false);
-                    qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << false;
+                if(requestUserName == "" || requestUserName == "admin"){
+                    if(userDataBase.CreateConnectToDb()){
+                        qDebug() << "DataBaseController: connect admin";
+                        qDebug() << "DataBaseController: db connect succesed!";
+                        temp.setVariable("messagetext", "Status: Connect to database successed!");
+                        temp.setCondition("sing-up_dataBase", true);
+                        qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << true;
+                    }
+                    else{
+                        qDebug() << "DataBaseController: db connect faild!";
+                        temp.setVariable("messagetext", "Status: Connect to database faild!");
+                        temp.setCondition("sing-up_dataBase", false);
+                        qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << false;
+                    }
                 }
             }
-
         }
         else if(idRole == CLIENT){
             if(username == "postgres"){
@@ -130,14 +130,27 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
                 qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << false;
             }
             else{
-                if(userDataBase.CreateConnectWithUser(requestUserName)){
-                    qDebug() << "DataBaseController: db connect succesed!";
-                    temp.setVariable("messagetext", " Status: Connect to database successed!");
+                if(requestUserName != ""){
+                    if(userDataBase.CreateConnectWithUser(requestUserName)){
+                        qDebug() << "DataBaseController: db connect succesed!";
+                        temp.setVariable("messagetext", " Status: Connect to database successed!");
+                    }
+                    else{
+                        qDebug() << "DataBaseController: db connect faild!";
+                        temp.setVariable("messagetext", " Status: Connect to dataBase faild!");
+                        temp.setCondition("sing-up_dataBase", false);
+                    }
                 }
                 else{
-                    qDebug() << "DataBaseController: db connect faild!";
-                    temp.setVariable("messagetext", " Status: Connect to dataBase faild!");
-                    temp.setCondition("sing-up_dataBase", false);
+                    if(userDataBase.CreateConnectWithUser(username)){
+                        qDebug() << "DataBaseController: db connect succesed!";
+                        temp.setVariable("messagetext", " Status: Connect to database successed!");
+                    }
+                    else{
+                        qDebug() << "DataBaseController: db connect faild!";
+                        temp.setVariable("messagetext", " Status: Connect to dataBase faild!");
+                        temp.setCondition("sing-up_dataBase", false);
+                    }
                 }
             }
         }
