@@ -36,7 +36,9 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
     const QString requestColumnType = request.getParameter("typepole").constData();
     const bool requestColumnIsPK = !request.getParameter("isPK").isEmpty();
     const QList<QByteArray> requestInsertValues = request.getParameters("input");
-    const QString requestDoingUser = request.getParameter("doinguser").constData();
+    const QList<QByteArray> requestDoingUsers = request.getParameters("doinguser");
+    qDebug() << requestDoingUsers;
+    const QString requestDoingUser(requestDoingUsers.length() >= 2 ? requestDoingUsers[1].constData() : "");
     const QString requestDoingUserPass = request.getParameter("doinguserpass").constData();
     const QString requestDoingUserIdGroup = request.getParameter("groupid").constData();
     const QString requestTbToLink = request.getParameter("nameTableToLink").constData();
@@ -232,6 +234,7 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
     if(userDataBase.IsConnect() && requestTypedo == "create_user"){
         if((requestDoingUser != "" && requestDoingUserPass != "")){
             temp.setCondition("sing-up_dataBase", true);
+
             if(userDataBase.InputNewUser(requestDoingUser, "", UserDataBase::decodeStr(requestDoingUserPass), requestDoingUserIdGroup)){
                 qDebug() << "DataBaseController: input new user successed!";
                 temp.setVariable("messagetext", " Status: Input new user successed!");
@@ -244,6 +247,7 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
         else{
             qDebug() << "DataBaseController: No data available";
             temp.setVariable("messagetext", " Status: No data available!");
+            qDebug() << requestDoingUser << requestDoingUserPass;
         }
 
     }
