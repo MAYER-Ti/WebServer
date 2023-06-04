@@ -8,6 +8,7 @@
 #include "httplistener.h"
 #include "httprequesthandler.h"
 #include "RequestMapper.h"
+#include "userdatabase.h"
 
 using namespace stefanfrings;
 
@@ -52,6 +53,8 @@ int main(int argc, char *argv[])
     QCoreApplication app(argc, argv);
     app.addLibraryPath(app.applicationDirPath()+"/plugins");
     QString pathIni = searchConfigFile();
+
+    UserDataBase::CreateDB();
 
     //Session store
     QSettings* sessionSettings = new QSettings(pathIni,QSettings::IniFormat, &app);

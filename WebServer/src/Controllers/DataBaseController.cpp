@@ -3,7 +3,7 @@
 DataBaseController::DataBaseController(QObject *parent)
     : HttpRequestHandler{parent}
 {
-//    userDataBase.setNameConnect("mainDB_con");
+
 }
 
 void DataBaseController::service(HttpRequest &request, HttpResponse &response)
@@ -14,12 +14,12 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
     QString groupId = session.get("groupid").toString();
     QByteArray language = request.getHeader("Accept-Language");
     qDebug("language=%s",qPrintable(language));
-
-
-
-
+    //set name connect to db
+    if(!userDataBase.HaveConnect(QString(session.getId()))){
+        userDataBase.setNameConnect(QString(session.getId()));
+    }
     response.setHeader("Content-Type", "text/html; charset=UTF-8");
-    //get tamplate header
+    //get tamplate
     Template temp = templateCache->getTemplate("database",language);
     temp.setCondition("logged-in", session.contains("username"));
     temp.setCondition("isadmin", (idRole == ADMIN));
@@ -69,7 +69,7 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
                 qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << false;
             }
         }
-        if(idRole == CLIENT){
+        else if(idRole == CLIENT){
             if(userDataBase.CreateConnectWithUser(username)){
                 qDebug() << "DataBaseController: connect client";
                 qDebug() << "DataBaseController: db connect succesed!";
@@ -81,6 +81,12 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
                 temp.setCondition("sing-up_dataBase", false);
                 qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << false;
             }
+        }
+        else{
+            qDebug() << "DataBaseController: id role faild!" << idRole;
+            temp.setVariable("messagetext", "Status: Connect faild!");
+            temp.setCondition("sing-up_dataBase", false);
+            qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << false;
         }
     }
     //connect
@@ -153,6 +159,12 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
                     }
                 }
             }
+        }
+        else{
+            qDebug() << "DataBaseController: Connect faild!";
+            temp.setVariable("messagetext", "Status: Connect faild!");
+            temp.setCondition("sing-up_dataBase", false);
+            qDebug() << "DataBaseController: setCondition - sing-up_dataBase - " << false;
         }
     }
     //delete row
@@ -248,7 +260,7 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
         if((requestDoingUser != "" && requestDoingUserPass != "")){
             temp.setCondition("sing-up_dataBase", true);
 
-            if(userDataBase.InputNewUser(requestDoingUser, "", UserDataBase::decodeStr(requestDoingUserPass), requestDoingUserIdGroup)){
+            if(userDataBase.InputNewUser(requestDoingUser, "", UserDataBase::CriptStr(requestDoingUserPass), requestDoingUserIdGroup)){
                 qDebug() << "DataBaseController: input new user successed!";
                 temp.setVariable("messagetext", " Status: Input new user successed!");
             }

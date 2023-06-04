@@ -10,7 +10,6 @@
 
 #define USERDATABASE_H
 
-#define KEY_TO_PASS 1238973
 #define HOSTNAME "localhost"
 #define USERNAME "postgres"
 #define DBNAME "postgres"
@@ -19,36 +18,38 @@
 #define ADMIN "0"
 #define CLIENT "1"
 
+static const QString kEncryptorString = QString("PAs142dfK3y");
+
 class UserDataBase : public QObject
 {
     Q_OBJECT
 private:
     QSqlDatabase m_ndb;
-//    QString nameConnect;
+    QString nameConnect;
     QSqlDatabase m_secdb;
 
 public:
     UserDataBase(QString _nameConnect, QObject *parent = nullptr);
     UserDataBase(QObject *parent = nullptr);
 
-    static QString encodeStr(QString str, quint32 key = KEY_TO_PASS);
-    static QString decodeStr(QString str, quint32 key = KEY_TO_PASS);
+    static QString CriptStr(QString toCrypt);
 
     QList<QList<QString>> getRequest(QString sqlReq);
-    bool HaveConnect(QString username);
+    bool HaveConnect(QString nameCon);
 
 
-//    void setNameConnect(QString _nameConnect){ nameConnect = _nameConnect; }
-//    QString getNameConnect(){ return nameConnect; }
-    bool IsOpen(){ return m_ndb.isOpen(); }
-    void CloseDb(){m_ndb.close(); }
-    bool OpenDb(){ return m_ndb.open(); }
-    bool IsConnect(){ return (!m_ndb.hostName().isEmpty() &&
+    inline void setNameConnect(QString _nameConnect){ nameConnect = _nameConnect; }
+    inline QString getNameConnect(){ return nameConnect; }
+    inline bool IsOpen(){ return m_ndb.isOpen(); }
+    inline void CloseDb(){m_ndb.close(); }
+    inline void RemoveConnection(){ if(m_ndb.isOpen()) m_ndb.close(); m_ndb.removeDatabase(m_ndb.connectionName()); }
+    inline bool OpenDb(){ return m_ndb.open(); }
+    inline bool IsConnect(){ return (!m_ndb.hostName().isEmpty() &&
                               !m_ndb.userName().isEmpty() &&
                               !m_ndb.databaseName().isEmpty() &&
-                               m_ndb.contains(m_ndb.connectionName())); }
+                               m_ndb.contains(nameConnect)); }
 
-    void CloseConnect(){ m_ndb.removeDatabase(m_ndb.connectionName()); }
+    inline void CloseConnect(){ m_ndb.removeDatabase(m_ndb.connectionName()); }
     bool DropRow(QString tbName, QString idRow);
     bool EditRow(QString tbName, QList<QByteArray> editValues, QList<QByteArray> headerValues, QString idEdit);
     bool DropTable(QString tbName);
@@ -56,7 +57,7 @@ public:
     bool CreateColumn(QString tbName, QString columnName, QString columnType, bool isPK, bool isNotNull = true);
     bool CreateLink(QString tbName, QString poleTbName, QString fromTbName, QString fromPoleTbName);
     bool SetIdGroup(QString userLogin, QString groupId);
-    bool CreateConnectToDb(QString _hostName = HOSTNAME, QString _userName = USERNAME, QString _dbName = DBNAME, QString _pass = PASS, QString _connectName = (QString(USERNAME)+"_con"));
+    bool CreateConnectToDb(QString _hostName = HOSTNAME, QString _userName = USERNAME, QString _dbName = DBNAME, QString _pass = PASS);
     bool CreateConnectWithUser(QString userLogin);
     bool InsertRow(QString tableName, QList<QByteArray> values);
     bool DropColumn(QString tableName, QString columnName);
@@ -64,11 +65,13 @@ public:
     QList<QList<QString>> getTables();
     QList<QString> getDbList(QString idRole, QString groupIdUser = "");
     int getIdRoleFromUser(QString userlogin);
-    bool CreateDB();
+    static bool CreateDB();
     bool isUser(QString userLogin, QString userPass);
     bool InputNewUser(QString userLogin, QString userYear, QString userPass, QString groupIdText = "NULL");
     bool DropUser(QString userLogin);
-
+    QString GetGroupId(QString username);
+private:
+    static int keyIndex(int index);
 };
 
 #endif // USERDATABASE_H

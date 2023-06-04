@@ -5,13 +5,7 @@
 LoginController::LoginController(QObject *parent)
     : HttpRequestHandler{parent}
 {
-//    userDataBase.setNameConnect("loginDB_con");
-    if(userDataBase.CreateConnectToDb("localhost", "postgres", "postgres", "12345678", "Reg_con")){
-        userDataBase.CreateDB();
-        qDebug() << "LoginController: db connect succesed!";
-    }
-    else
-        qDebug() << "LoginController: db connect faild!";
+
 }
 
 void LoginController::service(HttpRequest &request, HttpResponse &response)
@@ -21,42 +15,43 @@ void LoginController::service(HttpRequest &request, HttpResponse &response)
     QByteArray language = request.getHeader("Accept-Language");
     QString sessionUsername = session.get("username").toString();
     if(sessionUsername == ""){
+        if(!userDataBase.HaveConnect(QString(session.getId()))){
+            userDataBase.setNameConnect(QString(session.getId()));
+        }
+        if(userDataBase.CreateConnectToDb()){
+            qDebug() << "LoginController: db connect succesed!";
+        }
+        else{
+            qDebug() << "LoginController: db connect faild!";
+        }
         //get request login & pass
         QByteArray requestUsername = request.getParameter("username");
-        QByteArray requestPassword = request.getParameter("password");;
+        QByteArray requestPassword = request.getParameter("password");
         if(requestUsername != "" && requestPassword != ""){
             //connect or create dbLog if does not exist
             bool isUser = userDataBase.isUser(requestUsername, requestPassword);
             qDebug() << "LoginController: isUser - " << isUser;
-
             //log-in
             if(sessionUsername == "" && isUser){
                 int idRole = userDataBase.getIdRoleFromUser(requestUsername);
-
+                qDebug() << "LoginController: get role id - " << idRole;
+                QString idGroup = userDataBase.GetGroupId(requestUsername.constData());
+                qDebug() << "LoginController: get group id - " << idGroup;
                 session.set("username", requestUsername);
                 session.set("idrole", QString::number(idRole));
                 session.set("logintime", QTime::currentTime());
-                QString groupidUser;
-                QList<QList<QString>> grid = userDataBase.getRequest(QString("SELECT groupid FROM logusers WHERE loginuser = '%1'").arg(requestUsername.constData()));
-                qDebug() << "LoginController: get group id - " << grid;
-                if(!grid.isEmpty())
-                    groupidUser = grid.at(1).at(0);
-                else
-                    groupidUser = "";
-                session.set("groupid", groupidUser);
+                session.set("groupid", idGroup);
             }
-
             // show request log & pass
             qDebug("LoginController: Request username=%s", requestUsername.constData());
             qDebug("LoginController: Request password=%s", requestPassword.constData());
             qDebug() << "LoginController: Session username=" << sessionUsername;
         }
     }
-    //close connection to db
-    userDataBase.CloseDb();
+    //remove connection to db
+    userDataBase.RemoveConnection();
     //set http header
     response.setHeader("Content-Type", "text/html; charset=UTF-8");
-
     //set template
     Template temp = templateCache->getTemplate("login", language);
     temp.setCondition("logged-in", session.contains("username"));

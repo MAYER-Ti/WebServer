@@ -10,9 +10,7 @@ void RequestMapper::service(HttpRequest &request, HttpResponse &response)
 {
     QByteArray path = request.getPath();
     qDebug("RequestMapper: path=%s",path.data());
-
     HttpSession session = sessionStore->getSession(request,response,true);
-
     QByteArray sessionId = sessionStore->getSessionId(request,response);
     QString username = session.get("username").toString();
     QString idRole = session.get("idrole").toString();
@@ -20,11 +18,11 @@ void RequestMapper::service(HttpRequest &request, HttpResponse &response)
     qDebug() << "RequestMapper:" << "username" << username;
     qDebug() << "RequestMapper:" << "idrole" << idRole;
     qDebug() << "RequestMapper:" << "idgroup" << idGroup;
-
     if(path == "/logout"){
         if(!sessionId.isEmpty() && username != ""){
             session.remove("username");
             session.remove("idrole");
+            session.remove("groupid");
             session.remove("logintime");
             m_login.CloseDb();
             m_reg.CloseDb();
@@ -43,6 +41,7 @@ void RequestMapper::service(HttpRequest &request, HttpResponse &response)
         response.redirect("/home");
         return;
     }
+
     if(path == "/"){
         response.redirect("/home");
     }

@@ -1,3 +1,3 @@
 #ignore files build
 build*
-*.user
+*.user*
