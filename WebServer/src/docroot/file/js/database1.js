@@ -44,11 +44,7 @@ function onclick_to_row_list_tables(event){
         const rowForm = document.querySelectorAll("#rowForm")[0];
         const column = document.createElement("div");
         column.setAttribute("class", "col");
-        column.innerHTML = 
-        '<div class="form-floating">'
-            '<input type="text" class="form-control" placeholder="column">'
-            '<label>Name column</label>'
-        '</div>';
+        column.innerHTML = '<div class="form-floating"><input type="text" class="form-control" placeholder="column"><label>Name column</label></div>';
         ShowInputForms(valueCell, column, rowForm);
     }
     else if(nameCell == "column_name"){
