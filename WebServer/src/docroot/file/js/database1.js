@@ -80,13 +80,11 @@ function onclick_to_row_list_databases(event){
 
 function CountColumnsOfTable(nameSearchTable){
     var rows = document.querySelectorAll("#listtables tbody tr");
-    console.log(rows);
     var columns;
     var listColumnsOfTable = [];
     for(i = 0; i < rows.length; i++){
 
         columns = rows[i].children; //.outerText.split('\t')
-        console.log(columns);
         if(columns[0].innerText == nameSearchTable){
             listColumnsOfTable.push(columns[1].innerText);
         }

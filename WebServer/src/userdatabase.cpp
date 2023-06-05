@@ -9,17 +9,6 @@ bool UserDataBase::isUser(QString userLogin, QString userPass)
         qDebug() << "UserDataBase: isUser - Open -" << m_ndb.lastError().text();
         return false;
     }
-    //    if(!m_secdb.isOpen()){
-    //        m_secdb = QSqlDatabase::addDatabase("QPSQL", "secConnect");
-    //        m_secdb.setHostName(HOSTNAME);
-    //        m_secdb.setUserName(USERNAME);
-    //        m_secdb.setDatabaseName(DBNAME);
-    //        m_secdb.setPassword(PASS);
-    //        if(!m_secdb.open()){
-    //            qDebug() << "UserDataBase: isUser - Open sec db -" << m_secdb.lastError().text();
-    //            return false;
-    //        }
-    //    }
 
     QSqlQuery query(m_ndb);
 
@@ -52,10 +41,10 @@ bool UserDataBase::InputNewUser(QString userLogin, QString userYear, QString use
     }
     QSqlQuery query(m_ndb);
     qDebug() << "new user pass - " << userPass;
-    qDebug() << "new user pass code - " <<  UserDataBase::CriptStr(userPass);
-    qDebug() << "new user pass decode - " <<  UserDataBase::CriptStr(UserDataBase::CriptStr(userPass));
+    QString codePas = UserDataBase::CriptStr(userPass);
+    qDebug() << "new user pass code - " <<  codePas;
+    qDebug() << "new user pass decode - " <<  UserDataBase::CriptStr(codePas);
 
-    QString pasCode = UserDataBase::CriptStr(userPass);
     QString sqlReq = QString("SELECT loginuser FROM logusers WHERE loginuser = '%1';")
             .arg(userLogin);
     if(!query.exec(sqlReq)){
@@ -74,7 +63,11 @@ bool UserDataBase::InputNewUser(QString userLogin, QString userYear, QString use
         groupIdText ="NULL";
     }
     sqlReq = QString("INSERT INTO logusers(loginUser, yearUser, passwordUser, groupid)"
-                     "VALUES('%1', '%2', '%3', %4);").arg(userLogin).arg(userYear).arg(pasCode).arg(groupIdText);
+                     "VALUES('%1', '%2', '%3', %4);")
+            .arg(userLogin)
+            .arg(userYear)
+            .arg(codePas)
+            .arg(groupIdText);
     if(!query.exec(sqlReq)){
         qDebug() << "UserDataBase: InputNewUser - insert - " << query.lastError().text();
         m_ndb.close();
@@ -110,19 +103,6 @@ bool UserDataBase::InputNewUser(QString userLogin, QString userYear, QString use
 
 bool UserDataBase::DropUser(QString userLogin)
 {
-    //    if(!m_secdb.isOpen()){
-    //        if(!m_secdb.contains("secConnect")){
-    //             m_secdb = QSqlDatabase::addDatabase("QPSQL", "secConnect");
-    //        }
-    //        m_secdb.setHostName(HOSTNAME);
-    //        m_secdb.setUserName(USERNAME);
-    //        m_secdb.setDatabaseName(DBNAME);
-    //        m_secdb.setPassword(PASS);
-    //        if(!m_secdb.open()){
-    //            qDebug() << "UserDataBase: CreateDB - Open sec db -" << m_secdb.lastError().text();
-    //            return false;
-    //        }
-    //    }
     if(!m_ndb.open()){
         qDebug() << "UserDataBase: DropUser - Open - " << m_ndb.lastError().text();
         return false;
@@ -180,21 +160,12 @@ QString UserDataBase::GetGroupId(QString username)
     m_ndb.close();
     return result;
 }
-int UserDataBase::keyIndex(int index)
-{
-    int len = kEncryptorString.length();
-    int multiple = index / len;
-    if ( index >=  len ) {
-        return index - (len * multiple);
-    }
-    return index;
-}
 
 QString UserDataBase::CriptStr(QString toCrypt)
 {
     QString resultString = "";
     for ( int i = 0; i < toCrypt.length(); i++)
-        resultString.append(QString(QChar(toCrypt[i]).unicode()^QChar(kEncryptorString[keyIndex(i)]).unicode()));
+        resultString.append(QString(QChar(toCrypt[i]).unicode() ^ 0x211));
     return resultString;
 }
 
@@ -453,16 +424,13 @@ bool UserDataBase::SetIdGroup(QString userLogin, QString groupId)
 
 bool UserDataBase::CreateConnectToDb(QString _hostName, QString _userName, QString _dbName, QString _pass)
 {
-    //remove old conection
+    //close old conection
     if(m_ndb.isOpen()){
         m_ndb.close();
-        //        m_ndb.removeDatabase(m_ndb.connectionName());
     }
     //create new connection
-    //    if(!m_ndb.contains(nameConnect))
     m_ndb = QSqlDatabase::addDatabase("QPSQL", nameConnect);
-    //    else
-    //        m_ndb = QSqlDatabase::database(nameConnect);
+
     m_ndb.setHostName(_hostName);
     m_ndb.setUserName(_userName);
     m_ndb.setDatabaseName(_dbName);
@@ -477,16 +445,12 @@ bool UserDataBase::CreateConnectToDb(QString _hostName, QString _userName, QStri
 
 bool UserDataBase::CreateConnectWithUser(QString userLogin)
 {
-    //remove old conection
+    //close old conection
     if(m_ndb.contains(nameConnect)){
         m_ndb.close();
-        //        m_ndb.removeDatabase(nameConnect);
     }
     if(!m_secdb.isOpen()){
-        //        if(!m_secdb.contains(nameConnect+"_sec"))
         m_secdb = QSqlDatabase::addDatabase("QPSQL", nameConnect+"_sec");
-        //        else
-        //            m_secdb = QSqlDatabase::database(nameConnect+"_sec");
         m_secdb.setHostName(HOSTNAME);
         m_secdb.setUserName(USERNAME);
         m_secdb.setDatabaseName(DBNAME);
@@ -502,7 +466,6 @@ bool UserDataBase::CreateConnectWithUser(QString userLogin)
     if(!query.exec(sqlReq)){
         qDebug() << "UserDataBase: CreateConnectWithUser - select  -" << m_secdb.lastError().text();
         m_secdb.close();
-        //        m_secdb.removeDatabase(m_secdb.connectionName());
         return false;
     }
 
@@ -514,7 +477,6 @@ bool UserDataBase::CreateConnectWithUser(QString userLogin)
     qDebug() << pas;
     qDebug() << UserDataBase::CriptStr(pas);
     m_secdb.close();
-    //    m_secdb.removeDatabase(m_secdb.connectionName());
     //create new connection
     m_ndb = QSqlDatabase::addDatabase("QPSQL", nameConnect);
     m_ndb.setHostName(HOSTNAME);
@@ -606,10 +568,7 @@ QList<QString> UserDataBase::getDbList(QString idRole, QString groupIdUser)
 {
     QList<QString> out;
     if(!m_secdb.isOpen()){
-        //        if(!m_secdb.contains(nameConnect+"_sec"))
         m_secdb = QSqlDatabase::addDatabase("QPSQL", nameConnect+"_sec");
-        //        else
-        //            m_secdb = QSqlDatabase::database(nameConnect+"_sec");
         m_secdb.setHostName(HOSTNAME);
         m_secdb.setUserName(USERNAME);
         m_secdb.setDatabaseName(DBNAME);
@@ -619,13 +578,7 @@ QList<QString> UserDataBase::getDbList(QString idRole, QString groupIdUser)
             return out;
         }
     }
-    //    if(!m_ndb.open()){
-    //        qDebug() << "UserDataBase: getDbList - Open db -" << m_ndb.lastError().text();
-    //        m_secdb.close();
-    //        return out;
-    //    }
     QSqlQuery querySec(m_secdb);
-    //    QSqlQuery queryMain(m_ndb);
     QString SqlReq;
     if(idRole == CLIENT){
         if(groupIdUser != ""){
@@ -638,7 +591,6 @@ QList<QString> UserDataBase::getDbList(QString idRole, QString groupIdUser)
             if(!querySec.exec(SqlReq)){
                 qDebug() << "UserDataBase: getDbList - SELECT -" << querySec.lastError();
                 m_secdb.close();
-                //                m_ndb.close();
                 return out;
             }
             while(querySec.next()){
@@ -654,7 +606,6 @@ QList<QString> UserDataBase::getDbList(QString idRole, QString groupIdUser)
         if(!querySec.exec(SqlReq)){
             qDebug() << "UserDataBase: getDbList - SELECT -" << querySec.lastError();
             m_secdb.close();
-            //            m_ndb.close();
             return out;
         }
         while(querySec.next()){
@@ -662,7 +613,6 @@ QList<QString> UserDataBase::getDbList(QString idRole, QString groupIdUser)
         }
         qDebug() << "Userdatabase - dbs" << out;
     }
-    //    m_ndb.close();
     m_secdb.close();
     return out;
 }

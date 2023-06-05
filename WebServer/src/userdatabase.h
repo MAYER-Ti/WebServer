@@ -18,8 +18,6 @@
 #define ADMIN "0"
 #define CLIENT "1"
 
-static const QString kEncryptorString = QString("PAs142dfK3y");
-
 class UserDataBase : public QObject
 {
     Q_OBJECT
@@ -70,8 +68,6 @@ public:
     bool InputNewUser(QString userLogin, QString userYear, QString userPass, QString groupIdText = "NULL");
     bool DropUser(QString userLogin);
     QString GetGroupId(QString username);
-private:
-    static int keyIndex(int index);
 };
 
 #endif // USERDATABASE_H

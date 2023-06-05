@@ -7,8 +7,6 @@
 
 #define LOGINCONTROLLER_H
 
-#define KEYLOG 173072
-
 using namespace stefanfrings;
 
 class LoginController : public HttpRequestHandler

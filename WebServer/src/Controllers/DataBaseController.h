@@ -8,7 +8,6 @@
 
 #define ADMIN "0"
 #define CLIENT "1"
-#define PRO_CLIENT "2"
 
 using namespace stefanfrings;
 

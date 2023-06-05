@@ -260,7 +260,7 @@ void DataBaseController::service(HttpRequest &request, HttpResponse &response)
         if((requestDoingUser != "" && requestDoingUserPass != "")){
             temp.setCondition("sing-up_dataBase", true);
 
-            if(userDataBase.InputNewUser(requestDoingUser, "", UserDataBase::CriptStr(requestDoingUserPass), requestDoingUserIdGroup)){
+            if(userDataBase.InputNewUser(requestDoingUser, "", requestDoingUserPass, requestDoingUserIdGroup)){
                 qDebug() << "DataBaseController: input new user successed!";
                 temp.setVariable("messagetext", " Status: Input new user successed!");
             }
